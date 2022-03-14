@@ -11,7 +11,7 @@ public class Game {
         createCanvas();
         startMenu();
     }
-
+    //change is good, love change
     public void createCanvas() {
         StdDraw.setCanvasSize(WIDTH, HEIGHT);
         StdDraw.setXscale(0, X_SCALE);
