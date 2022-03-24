@@ -7,12 +7,16 @@ public class Game {
     public static final double PLAYER_RADIUS = 0.25; //radius of player
     public static double VX = 0.060;
 
-    public void createGame() {
+    public static void main(String[] args) {
+        createGame();  // some wierd case where my class needs a main, will look into it
+    }
+
+    public static void createGame() {
         createCanvas();
         startMenu();
     }
-    //change is good, love change
-    public void createCanvas() {
+
+    public static void createCanvas() {
         StdDraw.setCanvasSize(WIDTH, HEIGHT);
         StdDraw.setXscale(0, X_SCALE);
         StdDraw.setYscale(0, Y_SCALE);
@@ -23,7 +27,7 @@ public class Game {
         }
     }
 
-    public void startMenu() { // relook at while statement
+    public static void startMenu() { // relook at while statement
         StdDraw.clear();
         StdDraw.text(4, 4, "MENU");
 
@@ -43,16 +47,19 @@ public class Game {
         }
     }
 
-    public void newGame() {
+    public static void newGame() {
 
         StdDraw.clear();
 
         StdDraw.setPenColor(StdDraw.RED);
 
+        PlayerCharacter player = new PlayerCharacter(5.0, 0.5); //player character instantiated
+        StdDraw.filledCircle(player.getX(), player.getY(), 0.25);
+
         int N = 5; //NxN matrix of enemies
         Enemy[][] enemies = new Enemy[N][N];
 
-        CreateEnemies(N, enemies);
+        createEnemies(N, enemies);
 
 
         while (true) {
@@ -60,13 +67,14 @@ public class Game {
                 System.out.println("RESTART");
                 newGame();
             }*/
-            UpdateEnemies(N, enemies);
-
+            updateEnemies(N, enemies, player);
+            updateMissiles();
+            //updatePlayer(player);
         }
 
     }
 
-    public void CreateEnemies(int N, Enemy[][] enemies) {
+    public static void createEnemies(int N, Enemy[][] enemies) {
 
         for (int i = 0; i < N; i++) {    //Create array of Enemy objects
             for (int j = 0; j < N; j++) {
@@ -82,7 +90,45 @@ public class Game {
         }
     }
 
-    public void UpdateEnemies(int N, Enemy[][] enemies) {
+    /* Absolute value function -- makes sure that player moves in correct direction
+     * as VX variable oscillates between positive and negative */
+    public static double calcAbsoluteValue(double value) {
+        if (value > 0)
+            return value;
+        else
+            return -value;
+    }
+
+    public static void updatePlayer(PlayerCharacter player) {
+
+        if (StdDraw.isKeyPressed(37)) { // left arrow :37
+            if (player.getX() >= 0 + PLAYER_RADIUS) {
+                player.setX(player.getX() - calcAbsoluteValue(VX));// move left
+            } else {
+                // set multiplier to zero
+            }
+        } else {
+            // key release
+        }
+
+        if (StdDraw.isKeyPressed(39)) { // right: arrow 39
+            if (player.getX() <= WIDTH - PLAYER_RADIUS) {
+                player.setX(player.getX() + calcAbsoluteValue(VX));// move right
+            } else {
+                // set multiplier to zero
+            }
+        } else {
+            // key release
+        }
+
+        StdDraw.filledCircle(player.getX(), player.getY(), PLAYER_RADIUS);
+    }
+
+    public static void updateMissiles() {
+
+    }
+
+    public static void updateEnemies(int N, Enemy[][] enemies, PlayerCharacter player) {
 
         if (enemies[0][N - 1].getX() + ENEMY_RADIUS > 10 || enemies[0][0].getX() - ENEMY_RADIUS < 0) {
             VX = -VX;
@@ -96,21 +142,41 @@ public class Game {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 enemies[i][j].setX(enemies[i][j].getX() + VX);
-                System.out.println(enemies[i][j].getX() + " " + enemies[i][j].getY()); //Check for position of enemy objects in array
+                // System.out.println(enemies[i][j].getX() + " " + enemies[i][j].getY()); //Check for position of enemy objects in array
 
             }
         }
 
         StdDraw.clear();
-
+        updatePlayer(player);
         StdDraw.enableDoubleBuffering();
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 StdDraw.filledCircle(enemies[i][j].getX(), enemies[i][j].getY(), ENEMY_RADIUS);
+
             }
         }
 
         StdDraw.show(20);
     }
+
+    /*public static void keyPressed(KeyEvent key_event) { //event that key pressed
+        int keyPress = key_event.getKeyCode();
+
+        if (keyPress == KeyEvent.VK_LEFT) {
+            //move left
+        }
+
+        if (keyPress == KeyEvent.VK_RIGHT) {
+            //move left
+        }
+    }
+
+
+    public static void keyReleased(KeyEvent key_event) { //event that key released
+        int keyPress = key_event.getKeyCode();
+        //dont move
+    } */
 }
+
