@@ -5,6 +5,7 @@ public class Game {
     public static final int Y_SCALE = 10; //dividing canvas up vertically (helps with placement of drawings)
     public static final double ENEMY_RADIUS = 0.5; //radius of enemy
     public static final double PLAYER_RADIUS = 0.25; //radius of player
+    public static final double MISSILE_RADIUS = 0.2; //radius of missile
     public static double VX = 0.060;
 
     public static void main(String[] args) {
@@ -53,11 +54,13 @@ public class Game {
 
         StdDraw.setPenColor(StdDraw.RED);
 
-        PlayerCharacter player = new PlayerCharacter(5.0, 0.5); //player character instantiated
-        StdDraw.filledCircle(player.getX(), player.getY(), 0.25);
-
         int N = 5; //NxN matrix of enemies
         Enemy[][] enemies = new Enemy[N][N];
+
+        PlayerCharacter player = new PlayerCharacter(5.0, 0.5); //player character instantiated
+        createPlayer(player);
+
+        Missile missile1 = new Missile(player.getX(), player.getY() + PLAYER_RADIUS, false);
 
         createEnemies(N, enemies);
 
@@ -67,11 +70,16 @@ public class Game {
                 System.out.println("RESTART");
                 newGame();
             }*/
-            updateEnemies(N, enemies, player);
-            updateMissiles();
+            updateEnemies(N, enemies, player, missile1);
+            //updateMissiles();
             //updatePlayer(player);
         }
 
+    }
+
+    public static void createPlayer(PlayerCharacter player) {
+
+        StdDraw.filledCircle(player.getX(), player.getY(), 0.25);
     }
 
     public static void createEnemies(int N, Enemy[][] enemies) {
@@ -99,11 +107,12 @@ public class Game {
             return -value;
     }
 
-    public static void updatePlayer(PlayerCharacter player) {
+    public static void updatePlayer(PlayerCharacter player, Missile missile1) {
+        //Missile[] missile1 = new Missile[N];
 
         if (StdDraw.isKeyPressed(37)) { // left arrow :37
             if (player.getX() >= 0 + PLAYER_RADIUS) {
-                player.setX(player.getX() - calcAbsoluteValue(VX));// move left
+                player.setX(player.getX() - 2 * calcAbsoluteValue(VX));// move left
             } else {
                 // set multiplier to zero
             }
@@ -112,8 +121,8 @@ public class Game {
         }
 
         if (StdDraw.isKeyPressed(39)) { // right: arrow 39
-            if (player.getX() <= WIDTH - PLAYER_RADIUS) {
-                player.setX(player.getX() + calcAbsoluteValue(VX));// move right
+            if (player.getX() <= X_SCALE - PLAYER_RADIUS) {
+                player.setX(player.getX() + 2 * calcAbsoluteValue(VX));// move right
             } else {
                 // set multiplier to zero
             }
@@ -121,14 +130,32 @@ public class Game {
             // key release
         }
 
+        if (StdDraw.isKeyPressed(32)) { // spacebar
+            //missile[count] = createNewMissile(player.getX(), player.getY() + PLAYER_RADIUS); // add missile radius, too
+            missile1.setActive(true);
+            missile1.setX(player.getX());
+            StdDraw.filledCircle(missile1.getX(), missile1.getY(), MISSILE_RADIUS);
+        }
+
+        if (missile1.getActive()) {
+            updateMissiles(missile1);
+        }
         StdDraw.filledCircle(player.getX(), player.getY(), PLAYER_RADIUS);
     }
 
-    public static void updateMissiles() {
-
+    public static Missile createNewMissile(double xCoord, double yCoord) {
+        Missile newMissile = new Missile(xCoord, yCoord, false);
+        return newMissile;
+        // make missileArray globally accesable and check howto make it dynamic
     }
 
-    public static void updateEnemies(int N, Enemy[][] enemies, PlayerCharacter player) {
+    public static void updateMissiles(Missile missile1) {
+        missile1.setY(missile1.getY() + calcAbsoluteValue(VX));
+        StdOut.print(missile1.getY());
+        StdDraw.filledCircle(missile1.getX(), missile1.getY(), MISSILE_RADIUS);
+    }
+
+    public static void updateEnemies(int N, Enemy[][] enemies, PlayerCharacter player, Missile missile1) {
 
         if (enemies[0][N - 1].getX() + ENEMY_RADIUS > 10 || enemies[0][0].getX() - ENEMY_RADIUS < 0) {
             VX = -VX;
@@ -148,7 +175,7 @@ public class Game {
         }
 
         StdDraw.clear();
-        updatePlayer(player);
+        updatePlayer(player, missile1);//update player position
         StdDraw.enableDoubleBuffering();
 
         for (int i = 0; i < N; i++) {
@@ -179,4 +206,3 @@ public class Game {
         //dont move
     } */
 }
-
