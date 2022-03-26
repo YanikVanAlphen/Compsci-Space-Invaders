@@ -4,10 +4,10 @@ public class Enemy {
     private boolean enemyIsActive; //has enemy been eliminated or not?
 
     // Constructor/s:
-    public Enemy(double x, double y, boolean active) {
+    public Enemy(double x, double y) {
         this.X = x;
         this.Y = y;
-        this.enemyIsActive = active;
+        this.enemyIsActive = true;
     }
 
     // Instance Methods:
@@ -19,7 +19,7 @@ public class Enemy {
         return Y;
     }
 
-    public boolean getActive(){
+    public boolean getActive() {
         return enemyIsActive;
     }
 
