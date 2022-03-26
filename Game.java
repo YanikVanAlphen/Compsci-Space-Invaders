@@ -7,6 +7,8 @@ public class Game {
     public static final double PLAYER_RADIUS = 0.25; //radius of player
     public static final double MISSILE_RADIUS = 0.2; //radius of missile
     public static double VX = 0.060;
+    public static final int ENEMY_NUM = 5; //5 by 5 enemy block
+    public static final int MISSILE_NUM = 5; //Have max 5 missiles in play at a time
 
     public static void main(String[] args) {
         createGame();  // some wierd case where my class needs a main, will look into it
@@ -54,25 +56,33 @@ public class Game {
 
         StdDraw.setPenColor(StdDraw.RED);
 
-        int N = 5; //NxN matrix of enemies
-        Enemy[][] enemies = new Enemy[N][N];
+        Enemy[][] enemies = new Enemy[ENEMY_NUM][ENEMY_NUM];
+
+        Missile[] missiles = new Missile[MISSILE_NUM]; // declare array of missile objects
+
 
         PlayerCharacter player = new PlayerCharacter(5.0, 0.5); //player character instantiated
         createPlayer(player);
-
-        Missile missile1 = new Missile(player.getX(), player.getY() + PLAYER_RADIUS, false);
-
-        createEnemies(N, enemies);
-
+        createEnemies(ENEMY_NUM, enemies);
+        createMissiles(MISSILE_NUM, missiles);
 
         while (true) {
             /*if (StdDraw.isKeyPressed(114)) { // 114 = ascii for "r"; doesn't work
                 System.out.println("RESTART");
                 newGame();
             }*/
-            updateEnemies(N, enemies, player, missile1);
-            //updateMissiles();
-            //updatePlayer(player);
+            StdDraw.enableDoubleBuffering();
+
+            updateEnemies(ENEMY_NUM, enemies); //got rid of player and missiles passed as arguments - no longer need them in this method
+            updatePlayer(player, missiles);
+            displayMissiles(missiles);  //display missiles
+
+
+
+            StdDraw.show();
+            StdDraw.pause(20);
+            StdDraw.clear();
+
         }
 
     }
@@ -98,8 +108,15 @@ public class Game {
         }
     }
 
+    public static void createMissiles(int M, Missile[] missiles) {
+        for (int i = 0; i < M; i++) { //initialise array of missiles
+            Missile missile1 = new Missile(0.0, 0.0, false);
+            missiles[i] = missile1;
+        }
+    }
+
     /* Absolute value function -- makes sure that player moves in correct direction
-     * as VX variable oscillates between positive and negative */
+       as VX variable oscillates between positive and negative */
     public static double calcAbsoluteValue(double value) {
         if (value > 0)
             return value;
@@ -107,55 +124,66 @@ public class Game {
             return -value;
     }
 
-    public static void updatePlayer(PlayerCharacter player, Missile missile1) {
-        //Missile[] missile1 = new Missile[N];
+    public static void updatePlayer(PlayerCharacter player, Missile[] missiles) {
 
         if (StdDraw.isKeyPressed(37)) { // left arrow :37
             if (player.getX() >= 0 + PLAYER_RADIUS) {
                 player.setX(player.getX() - 2 * calcAbsoluteValue(VX));// move left
-            } else {
+            } /*else {
                 // set multiplier to zero
             }
         } else {
-            // key release
+            // key release*/
         }
 
-        if (StdDraw.isKeyPressed(39)) { // right: arrow 39
-            if (player.getX() <= X_SCALE - PLAYER_RADIUS) {
+        if (StdDraw.isKeyPressed(39)) { // right arrow: 39
+            if (player.getX() <= X_SCALE - PLAYER_RADIUS)
                 player.setX(player.getX() + 2 * calcAbsoluteValue(VX));// move right
-            } else {
-                // set multiplier to zero
-            }
-        } else {
-            // key release
+
         }
 
-        if (StdDraw.isKeyPressed(32)) { // spacebar
-            //missile[count] = createNewMissile(player.getX(), player.getY() + PLAYER_RADIUS); // add missile radius, too
-            missile1.setActive(true);
-            missile1.setX(player.getX());
-            StdDraw.filledCircle(missile1.getX(), missile1.getY(), MISSILE_RADIUS);
+        if (StdDraw.isKeyPressed(32)) { // space-bar: 32
+            updateMissiles(missiles, player);
         }
 
-        if (missile1.getActive()) {
-            updateMissiles(missile1);
-        }
         StdDraw.filledCircle(player.getX(), player.getY(), PLAYER_RADIUS);
     }
 
-    public static Missile createNewMissile(double xCoord, double yCoord) {
-        Missile newMissile = new Missile(xCoord, yCoord, false);
-        return newMissile;
-        // make missileArray globally accesable and check howto make it dynamic
+
+    public static void updateMissiles(Missile[] missiles, PlayerCharacter player) {  // update missiles state
+       for ( int i = 0; i < MISSILE_NUM; i++) {
+           if ( missiles[i].getActive() == false) {
+               missiles[i].setActive(true);
+               missiles[i].setX(player.getX());
+               missiles[i].setY(player.getY());
+               break; //use this instead of i i = MISSILE_NUM
+           }
+       }
     }
 
-    public static void updateMissiles(Missile missile1) {
-        missile1.setY(missile1.getY() + calcAbsoluteValue(VX));
-        StdOut.print(missile1.getY());
-        StdDraw.filledCircle(missile1.getX(), missile1.getY(), MISSILE_RADIUS);
+    public static void displayMissiles(Missile[] missiles) {   // Draw active missiles and update positions
+        for ( int i = 0; i < MISSILE_NUM; i++) {
+            if (missiles[i].getActive()) {
+                missiles[i].setY(missiles[i].getY() + calcAbsoluteValue(VX));
+                //StdOut.print(missiles[i].getY()); //check to see if missile is moving
+                StdDraw.filledCircle(missiles[i].getX(), missiles[i].getY(), MISSILE_RADIUS);
+            }
+        }
+
     }
 
-    public static void updateEnemies(int N, Enemy[][] enemies, PlayerCharacter player, Missile missile1) {
+    public static void destroy(Missile[] missiles, Enemy[][] enemies){
+      for (int i = 0; i < ENEMY_NUM; i++){
+          for(int j = 0; j < ENEMY_NUM; j++){
+              for(int k = 0; k < MISSILE_NUM; k++){
+                  if((enemies[i][j].getX() == missiles[k].getX() && (enemies[i][j].getY() == missiles[k].getY())))
+
+              }
+          }
+      }
+    }
+
+    public static void updateEnemies(int N, Enemy[][] enemies) {
 
         if (enemies[0][N - 1].getX() + ENEMY_RADIUS > 10 || enemies[0][0].getX() - ENEMY_RADIUS < 0) {
             VX = -VX;
@@ -174,9 +202,6 @@ public class Game {
             }
         }
 
-        StdDraw.clear();
-        updatePlayer(player, missile1);//update player position
-        StdDraw.enableDoubleBuffering();
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
@@ -184,8 +209,6 @@ public class Game {
 
             }
         }
-
-        StdDraw.show(20);
     }
 
     /*public static void keyPressed(KeyEvent key_event) { //event that key pressed

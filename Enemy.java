@@ -1,11 +1,13 @@
 public class Enemy {
     // Instance Variables:
     private double X, Y;
+    private boolean enemyIsActive; //has enemy been eliminated or not?
 
     // Constructor/s:
-    public Enemy(double x, double y) {
+    public Enemy(double x, double y, boolean active) {
         this.X = x;
         this.Y = y;
+        this.enemyIsActive = active;
     }
 
     // Instance Methods:
@@ -17,11 +19,19 @@ public class Enemy {
         return Y;
     }
 
+    public boolean getActive(){
+        return enemyIsActive;
+    }
+
     public void setX(double x) {
         X = x;
     }
 
     public void setY(double y) {
         Y = y;
+    }
+
+    public void setActive(boolean active){
+        enemyIsActive = active;
     }
 }
