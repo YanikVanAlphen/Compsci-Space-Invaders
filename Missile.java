@@ -4,13 +4,13 @@ public class Missile {
     // attributes of player character
     private double X, Y;
     private boolean missileIsActive; // is missile eliminated or not
-    private int angle; //use this in rotation calculation
+    private int angle; 
 
-    public Missile(double x, double y, boolean active) {
+    public Missile(double x, double y, boolean active, int theta) {
         this.X = x;
         this.Y = y;
         this.missileIsActive = active;
-        this.angle = 0;
+        this.angle = theta;
     }
 
     public double getX() {
@@ -37,15 +37,11 @@ public class Missile {
         missileIsActive = active;
     }
 
-    public void calcRotation(int angle, double speed) {
-        if (angle == 0) {
-            this.Y += speed;
-        } else {
-            double y = speed * Math.cos(angle * Math.PI / 180);
-            double x = speed * Math.sin(angle * Math.PI / 180);
+    public int getangle() {
+        return angle;
+    }
 
-            this.X += x;
-            this.Y += y;
-        }
+    public void setangle( int theta ) {
+        angle = theta;
     }
 }
