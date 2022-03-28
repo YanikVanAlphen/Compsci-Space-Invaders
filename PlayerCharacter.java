@@ -4,6 +4,7 @@ public class PlayerCharacter {
     // attributes of player character
     private double X, Y;
     private int playerHealth = 100;
+    private int angle = 0;
 
     public PlayerCharacter(double x, double y) {
         this.X = x;
@@ -24,5 +25,12 @@ public class PlayerCharacter {
 
     public void setY(double y) {
         Y = y;
+    }
+    public void setangle( int theta) {
+        angle = theta;
+    }
+
+    public int getangle() {
+        return angle;
     }
 }
