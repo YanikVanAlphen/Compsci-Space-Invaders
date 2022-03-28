@@ -37,16 +37,15 @@ public class Missile {
         missileIsActive = active;
     }
 
-    public void calcRotation(int angle, double speed){
-        if (angle == 0){
+    public void calcRotation(int angle, double speed) {
+        if (angle == 0) {
             this.Y += speed;
         } else {
-            double x = speed * Math.cos(angle * Math.PI / 180);
-            double y = speed * Math.sin(angle * Math.PI / 180);
+            double y = speed * Math.cos(angle * Math.PI / 180);
+            double x = speed * Math.sin(angle * Math.PI / 180);
 
             this.X += x;
             this.Y += y;
         }
     }
 }
-

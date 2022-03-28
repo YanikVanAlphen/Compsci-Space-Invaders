@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.ArrayList;
 
 public class Game {
@@ -7,8 +8,8 @@ public class Game {
     public static final int Y_SCALE = 10; //dividing canvas up vertically (helps with placement of drawings)
     public static final double ENEMY_RADIUS = 0.5; //radius of enemy
     public static final double PLAYER_RADIUS = 0.25; //radius of player
-    public static final double MISSILE_RADIUS = 0.2; //radius of missile
-    public static double VX = 0.060;
+    public static final double MISSILE_RADIUS = 0.08; //radius of missile
+    public static double VX = 0.060; // speed of objects
 
     public static final int ENEMY_NUM = 5; //5 by 5 enemy block
     public static final int MISSILE_NUM = 5; //Have max 5 missiles in play at a time
@@ -16,12 +17,13 @@ public class Game {
     public ArrayList<Missile> MISSILES = new ArrayList<Missile>();
     public static final double MISSILE_SPEED = 0.15;
     public static long FRAME_COUNT = 0;
+    public static long PLAYER_ROTATION = 0;
 
     public static void main(String[] args) {
         Game g = new Game();  // some wierd case where my class needs a main, will look into it
     }
 
-    public Game(){
+    public Game() {
         createGame();
     }
 
@@ -34,6 +36,7 @@ public class Game {
         StdDraw.setCanvasSize(WIDTH, HEIGHT);
         StdDraw.setXscale(0, X_SCALE);
         StdDraw.setYscale(0, Y_SCALE);
+
 
         for (int i = 0; i <= X_SCALE; i++) { //drawing lines to help with initial placement of drawings
             StdDraw.line(i, 0, i, Y_SCALE);
@@ -55,7 +58,7 @@ public class Game {
         if (StdDraw.isKeyPressed(10)) { // 10 = ascii for ENTER
             newGame();
         } else {
-            StdDraw.clear();
+            StdDraw.clear(Color.BLACK);
             System.out.println("TERMINATING:  " + (int) StdDraw.nextKeyTyped());
             System.exit(1);
         }
@@ -63,7 +66,7 @@ public class Game {
 
     public void newGame() {
 
-        StdDraw.clear();
+        StdDraw.clear(Color.BLACK);
 
         StdDraw.setPenColor(StdDraw.RED);
 
@@ -75,10 +78,14 @@ public class Game {
 
         while (true) {
             FRAME_COUNT++;
-            /*if (StdDraw.isKeyPressed(114)) { // 114 = ascii for "r"; doesn't work
+            if (StdDraw.isKeyPressed(82)) { // 114 = ascii for "r"; doesn't work
                 System.out.println("RESTART");
                 newGame();
-            }*/
+
+                for (int i = 0; i < 5; i++) {
+                    MISSILES.remove(i);
+                }
+            }
             StdDraw.enableDoubleBuffering();
 
             updateEnemies(ENEMY_NUM, enemies);
@@ -87,18 +94,17 @@ public class Game {
             destroy(enemies);
 
 
-
             StdDraw.show();
             StdDraw.pause(20);
-            StdDraw.clear();
+            StdDraw.clear(Color.BLACK);
 
         }
 
     }
 
     public void createPlayer(PlayerCharacter player) {
-
-        StdDraw.filledCircle(player.getX(), player.getY(), 0.25);
+        StdDraw.picture(5, 5, "images/player.jpg", 1, 1);
+        // StdDraw.filledCircle(player.getX(), player.getY(), 0.25);
     }
 
     public void createEnemies(int N, Enemy[][] enemies) {
@@ -112,13 +118,21 @@ public class Game {
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                StdDraw.filledCircle(enemies[i][j].getX(), enemies[i][j].getY(), 0.5);
+                StdDraw.filledCircle(enemies[i][j].getX(), enemies[i][j].getY(), ENEMY_RADIUS);
             }
         }
     }
 
 
     public void updatePlayer(PlayerCharacter player) {
+
+        if (StdDraw.isKeyPressed(81)) { // rotate left
+
+        }
+
+        if (StdDraw.isKeyPressed(69)) { // rotate right
+
+        }
 
         if (StdDraw.isKeyPressed(37)) { // left arrow :37
             if (player.getX() >= 0 + PLAYER_RADIUS) {
@@ -135,43 +149,50 @@ public class Game {
         if (FRAME_COUNT > 5 && StdDraw.isKeyPressed(32)) { // space-bar: 32
             FRAME_COUNT = 0;
             MISSILES.add(new Missile(player.getX(), player.getY(), true));
+            StdAudio.play("images/missileShoot.wav");
         }
-
-        StdDraw.filledCircle(player.getX(), player.getY(), PLAYER_RADIUS);
+        StdDraw.picture(player.getX(), player.getY(), "images/player.jpg", 1, 1);
+        //StdDraw.filledCircle(player.getX(), player.getY(), PLAYER_RADIUS);
     }
 
 
     public void updateMissiles() {  // update missiles state
-       for(int i = 0; i < MISSILES.size(); i++){
-           MISSILES.get(i).setY(MISSILES.get(i).getY() + MISSILE_SPEED);
+        for (int i = 0; i < MISSILES.size(); i++) {
+            MISSILES.get(i).setY(MISSILES.get(i).getY() + MISSILE_SPEED);
 
-           StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY() + PLAYER_RADIUS, MISSILE_RADIUS);
+            if (MISSILES.get(i).getActive()) {
+                StdDraw.setPenColor(Color.WHITE);
+                StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY() + PLAYER_RADIUS, MISSILE_RADIUS);
+                StdDraw.setPenColor(Color.RED);
+                System.out.println(MISSILES.get(i).getX() + " " + MISSILES.get(i).getY());
+            }
 
-           System.out.println(MISSILES.get(i).getX() + " " + MISSILES.get(i).getY());
-
-           if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE)
-               MISSILES.remove(i);
-       }
+            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE)
+                MISSILES.remove(i);
+        }
     }
 
 
-    public void destroy(Enemy[][] enemies){
-      for(int i = 0; i < ENEMY_NUM; i++){
-          for(int j = 0; j < ENEMY_NUM; j++){
-              for(int k = 0; k < MISSILES.size(); k++){
-                  Enemy e = enemies[i][j];
-                  Missile m = MISSILES.get(k);
+    public void destroy(Enemy[][] enemies) {
+        for (int i = 0; i < ENEMY_NUM; i++) {
+            for (int j = 0; j < ENEMY_NUM; j++) {
+                for (int k = 0; k < MISSILES.size(); k++) {
+                    Enemy e = enemies[i][j];
+                    Missile m = MISSILES.get(k);
 
-                  if(e.getActive()) {
-                      if ((m.getX() >  e.getX() - ENEMY_RADIUS - MISSILE_RADIUS) && (m.getX() <  e.getX() + ENEMY_RADIUS + MISSILE_RADIUS)
-                              && (m.getY() >  e.getY() - ENEMY_RADIUS - MISSILE_RADIUS) && (m.getY() <  e.getY() + ENEMY_RADIUS + MISSILE_RADIUS)) {
-                          MISSILES.remove(k);
-                          e.setActive(false);
-                      }
-                  }
-              }
-          }
-      }
+                    if (e.getActive()) {
+                        if ((m.getX() > e.getX() - ENEMY_RADIUS - MISSILE_RADIUS) &&
+                                (m.getX() < e.getX() + ENEMY_RADIUS + MISSILE_RADIUS) &&
+                                (m.getY() > e.getY() - ENEMY_RADIUS - MISSILE_RADIUS) &&
+                                (m.getY() < e.getY() + ENEMY_RADIUS + MISSILE_RADIUS)) {
+                            MISSILES.remove(k);
+                            e.setActive(false);
+                            StdAudio.play("images/missileExplode.wav");
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void updateEnemies(int N, Enemy[][] enemies) {
@@ -180,7 +201,7 @@ public class Game {
             VX = -VX;
             for (int i = 0; i < N; i++) {
                 for (int j = 0; j < N; j++) {
-                    enemies[i][j].setY(enemies[i][j].getY() - 0.5);
+                    enemies[i][j].setY(enemies[i][j].getY() - ENEMY_RADIUS);
                 }
             }
         }

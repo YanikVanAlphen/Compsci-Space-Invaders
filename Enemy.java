@@ -31,7 +31,7 @@ public class Enemy {
         Y = y;
     }
 
-    public void setActive(boolean active){
+    public void setActive(boolean active) {
         enemyIsActive = active;
     }
 }
