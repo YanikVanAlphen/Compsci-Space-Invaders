@@ -76,6 +76,7 @@ public class Game {
         createPlayer(player);
         createEnemies(ENEMY_NUM, enemies);
 
+
         while (true) {
             FRAME_COUNT++;
             if (StdDraw.isKeyPressed(82)) { // 114 = ascii for "r"; doesn't work
@@ -127,11 +128,15 @@ public class Game {
     public void updatePlayer(PlayerCharacter player) {
 
         if (StdDraw.isKeyPressed(81)) { // rotate left
-
+            if (player.getangle() >= -90) {
+            player.setangle(player.getangle() - 1);
+            }
         }
 
         if (StdDraw.isKeyPressed(69)) { // rotate right
-
+            if (player.getangle() <= 90) {
+                player.setangle(player.getangle() + 1);
+            }
         }
 
         if (StdDraw.isKeyPressed(37)) { // left arrow :37
@@ -148,7 +153,7 @@ public class Game {
 
         if (FRAME_COUNT > 5 && StdDraw.isKeyPressed(32)) { // space-bar: 32
             FRAME_COUNT = 0;
-            MISSILES.add(new Missile(player.getX(), player.getY(), true));
+            MISSILES.add(new Missile(player.getX(), player.getY(), true, player.getangle()));
             StdAudio.play("images/missileShoot.wav");
         }
         StdDraw.picture(player.getX(), player.getY(), "images/player.jpg", 1, 1);
@@ -158,7 +163,14 @@ public class Game {
 
     public void updateMissiles() {  // update missiles state
         for (int i = 0; i < MISSILES.size(); i++) {
-            MISSILES.get(i).setY(MISSILES.get(i).getY() + MISSILE_SPEED);
+
+            if (MISSILES.get(i).getangle() == 0) {
+                MISSILES.get(i).setY(MISSILES.get(i).getY() + MISSILE_SPEED);
+            } else {
+                double theta = (double) MISSILES.get(i).getangle()*Math.PI/180;
+                MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta)*MISSILE_SPEED));
+                MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta)*MISSILE_SPEED));
+            }
 
             if (MISSILES.get(i).getActive()) {
                 StdDraw.setPenColor(Color.WHITE);
