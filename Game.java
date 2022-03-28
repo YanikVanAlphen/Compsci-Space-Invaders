@@ -209,11 +209,17 @@ public class Game {
 
     public void updateEnemies(int N, Enemy[][] enemies) {
 
-        if (enemies[0][N - 1].getX() + ENEMY_RADIUS > 10 || enemies[0][0].getX() - ENEMY_RADIUS < 0) {
-            VX = -VX;
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    enemies[i][j].setY(enemies[i][j].getY() - ENEMY_RADIUS);
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if ((enemies[i][j].getX() + ENEMY_RADIUS > 10 || enemies[i][j].getX() - ENEMY_RADIUS < 0 ) && enemies[i][j].getActive() == true) {
+                    VX = -VX;
+                    for (int m = 0; m < N; m++) {
+                        for (int n = 0; n < N; n++) {
+                            enemies[m][n].setY(enemies[m][n].getY() - ENEMY_RADIUS);
+                        }
+                    }
+                    i = N;
+                    j = N;
                 }
             }
         }
