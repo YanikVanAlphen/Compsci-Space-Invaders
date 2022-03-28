@@ -3,7 +3,7 @@ public class PlayerCharacter {
 
     // attributes of player character
     private double X, Y;
-    private int playerHealth = 100;
+    private int playerLives = 3;
     private int angle = 0;
 
     public PlayerCharacter(double x, double y) {
@@ -19,6 +19,14 @@ public class PlayerCharacter {
         return Y;
     }
 
+    public int getPlayerLives() {
+        return playerLives;
+    }
+
+    public int getangle() {
+        return angle;
+    }
+
     public void setX(double x) {
         X = x;
     }
@@ -26,11 +34,13 @@ public class PlayerCharacter {
     public void setY(double y) {
         Y = y;
     }
-    public void setangle( int theta) {
+
+    public void setPlayerLives(int lives) {
+        playerLives = lives;
+    }
+    
+    public void setangle(int theta) {
         angle = theta;
     }
 
-    public int getangle() {
-        return angle;
-    }
 }

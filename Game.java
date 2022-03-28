@@ -17,7 +17,6 @@ public class Game {
     public ArrayList<Missile> MISSILES = new ArrayList<Missile>();
     public static final double MISSILE_SPEED = 0.15;
     public static long FRAME_COUNT = 0;
-    public static long PLAYER_ROTATION = 0;
 
     public static void main(String[] args) {
         Game g = new Game();  // some wierd case where my class needs a main, will look into it
@@ -78,15 +77,24 @@ public class Game {
 
 
         while (true) {
+
             FRAME_COUNT++;
+
             if (StdDraw.isKeyPressed(82)) { // 114 = ascii for "r"; doesn't work
                 System.out.println("RESTART");
                 newGame();
 
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < MISSILES.size(); i++) {
                     MISSILES.remove(i);
                 }
             }
+
+            if (enemyByPlayer(enemies, player)) {
+                System.out.println("RESTART");
+                player.setPlayerLives(player.getPlayerLives() - 1);
+                newGame();
+            }
+
             StdDraw.enableDoubleBuffering();
 
             updateEnemies(ENEMY_NUM, enemies);
@@ -103,8 +111,23 @@ public class Game {
 
     }
 
+    public boolean enemyByPlayer(Enemy[][] enemies, PlayerCharacter player) {
+        boolean answer = false;
+
+        for (int i = 0; i < ENEMY_NUM; i++) {
+            for (int j = 0; j < ENEMY_NUM; j++) {
+                if ((enemies[i][j].getActive()) && (enemies[i][j].getY() - ENEMY_RADIUS < player.getY() + 1)) {
+                    answer = true;
+                    i = ENEMY_NUM;
+                    j = ENEMY_NUM;
+                }
+            }
+        }
+        return answer;
+    }
+
     public void createPlayer(PlayerCharacter player) {
-        StdDraw.picture(5, 5, "images/player.jpg", 1, 1);
+        StdDraw.picture(player.getX(), player.getY(), "images/player.jpg", 1, 1);
         // StdDraw.filledCircle(player.getX(), player.getY(), 0.25);
     }
 
@@ -129,7 +152,7 @@ public class Game {
 
         if (StdDraw.isKeyPressed(81)) { // rotate left
             if (player.getangle() >= -90) {
-            player.setangle(player.getangle() - 1);
+                player.setangle(player.getangle() - 1);
             }
         }
 
@@ -167,9 +190,9 @@ public class Game {
             if (MISSILES.get(i).getangle() == 0) {
                 MISSILES.get(i).setY(MISSILES.get(i).getY() + MISSILE_SPEED);
             } else {
-                double theta = (double) MISSILES.get(i).getangle()*Math.PI/180;
-                MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta)*MISSILE_SPEED));
-                MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta)*MISSILE_SPEED));
+                double theta = (double) MISSILES.get(i).getangle() * Math.PI / 180;
+                MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta) * MISSILE_SPEED));
+                MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta) * MISSILE_SPEED));
             }
 
             if (MISSILES.get(i).getActive()) {
@@ -211,7 +234,7 @@ public class Game {
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                if ((enemies[i][j].getX() + ENEMY_RADIUS > 10 || enemies[i][j].getX() - ENEMY_RADIUS < 0 ) && enemies[i][j].getActive() == true) {
+                if ((enemies[i][j].getX() + ENEMY_RADIUS > 10 || enemies[i][j].getX() - ENEMY_RADIUS < 0) && enemies[i][j].getActive() == true) {
                     VX = -VX;
                     for (int m = 0; m < N; m++) {
                         for (int n = 0; n < N; n++) {
