@@ -6,17 +6,21 @@ public class Game {
     public static final int HEIGHT = 600; //height of canvas in pixels
     public static final int X_SCALE = 10; //dividing canvas up horizontally (helps with placement of drawings)
     public static final int Y_SCALE = 10; //dividing canvas up vertically (helps with placement of drawings)
+
     public static final double ENEMY_RADIUS = 0.5; //radius of enemy
     public static final double PLAYER_RADIUS = 0.25; //radius of player
     public static final double MISSILE_RADIUS = 0.08; //radius of missile
+
     public static double VX = 0.060; // speed of objects
 
     public static final int ENEMY_NUM = 5; //5 by 5 enemy block
-    public static final int MISSILE_NUM = 5; //Have max 5 missiles in play at a time
 
     public ArrayList<Missile> MISSILES = new ArrayList<Missile>();
     public static final double MISSILE_SPEED = 0.15;
+
     public static long FRAME_COUNT = 0;
+    
+    public int LIVES = 3;
 
     public static void main(String[] args) {
         Game g = new Game();  // some wierd case where my class needs a main, will look into it
@@ -35,28 +39,41 @@ public class Game {
         StdDraw.setCanvasSize(WIDTH, HEIGHT);
         StdDraw.setXscale(0, X_SCALE);
         StdDraw.setYscale(0, Y_SCALE);
-
-
-        for (int i = 0; i <= X_SCALE; i++) { //drawing lines to help with initial placement of drawings
-            StdDraw.line(i, 0, i, Y_SCALE);
-            StdDraw.line(0, i, X_SCALE, i);
-        }
     }
 
     public void startMenu() { // relook at while statement
         StdDraw.clear();
-        StdDraw.text(4, 4, "MENU");
 
-        while (!StdDraw.isKeyPressed(10)) { //while enter or "q" hasn't be pressed, start menu screen must remain same
+        Font font1 = new Font("Serif", Font.BOLD, 50);
+        StdDraw.setFont(font1);
+        StdDraw.text(5, 9.5, "Zombie Zapper");
+
+        Font font2 = new Font("Serif", Font.PLAIN, 30);
+        StdDraw.setFont(font2);
+        StdDraw.text(5, 8.7, "Press Enter to enter at own risk...");
+
+        Font font3 = new Font("Serif", Font.BOLD, 35);
+        StdDraw.setFont(font3);
+        StdDraw.text(5, 6, "Survival Guide:");
+
+        StdDraw.setFont(font2);
+        StdDraw.text(5, 5.5, "Shoot(Space)");
+        StdDraw.text(5, 4.5, "Rotate: Left(q), Right(e)");
+        StdDraw.text(5, 3.5, "Move: left(left arrow), right(right arrow)");
+
+        StdDraw.setFont(font3);
+        StdDraw.text(5, 0.5, "To restart the game press 'r'");
+
+        while (!StdDraw.isKeyPressed(10)) { //while enter has not been pressed, start menu screen must remain same
             while (!StdDraw.hasNextKeyTyped()) {
             } // loop until a key is pressed
             System.out.println("WRONG KEY:  " + (int) StdDraw.nextKeyTyped());
         }
 
 
-        if (StdDraw.isKeyPressed(10)) { // 10 = ascii for ENTER
+        if (StdDraw.isKeyPressed(10)) { // 10 = ascii for Enter
             newGame();
-        } else {
+        } else /*if (StdDraw.isKeyPressed(113))*/ {
             StdDraw.clear(Color.BLACK);
             System.out.println("TERMINATING:  " + (int) StdDraw.nextKeyTyped());
             System.exit(1);
@@ -74,15 +91,17 @@ public class Game {
         PlayerCharacter player = new PlayerCharacter(5.0, 0.5); //player character instantiated
         createPlayer(player);
         createEnemies(ENEMY_NUM, enemies);
+        player.setPlayerLives(LIVES);
 
-
-        while (true) {
-
+        while (LIVES > 0) {
+            StdDraw.setFont();
+            StdDraw.text(9, 9.8, "Lives: " + LIVES);
             FRAME_COUNT++;
 
             if (StdDraw.isKeyPressed(82)) { // 114 = ascii for "r"; doesn't work
                 System.out.println("RESTART");
                 newGame();
+                LIVES = 3;
 
                 for (int i = 0; i < MISSILES.size(); i++) {
                     MISSILES.remove(i);
@@ -91,7 +110,9 @@ public class Game {
 
             if (enemyByPlayer(enemies, player)) {
                 System.out.println("RESTART");
-                player.setPlayerLives(player.getPlayerLives() - 1);
+                LIVES--;
+                //System.out.println(LIVES);
+                player.setPlayerLives(LIVES);
                 newGame();
             }
 
@@ -135,7 +156,7 @@ public class Game {
 
         for (int i = 0; i < N; i++) {    //Create array of Enemy objects
             for (int j = 0; j < N; j++) {
-                Enemy e1 = new Enemy(0.5 + ((2 * ENEMY_RADIUS) * j), 9.5 - ((2 * ENEMY_RADIUS) * i));
+                Enemy e1 = new Enemy(0.5 + ((2 * ENEMY_RADIUS) * j), 9.0 - ((2 * ENEMY_RADIUS) * i));
                 enemies[i][j] = e1;
             }
         }
