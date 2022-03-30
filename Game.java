@@ -208,13 +208,9 @@ public class Game {
     public void updateMissiles() {  // update missiles state
         for (int i = 0; i < MISSILES.size(); i++) {
 
-            if (MISSILES.get(i).getangle() == 0) {
-                MISSILES.get(i).setY(MISSILES.get(i).getY() + MISSILE_SPEED);
-            } else {
                 double theta = (double) MISSILES.get(i).getangle() * Math.PI / 180;
                 MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta) * MISSILE_SPEED));
                 MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta) * MISSILE_SPEED));
-            }
 
             if (MISSILES.get(i).getActive()) {
                 StdDraw.setPenColor(Color.WHITE);
@@ -223,7 +219,7 @@ public class Game {
                 System.out.println(MISSILES.get(i).getX() + " " + MISSILES.get(i).getY());
             }
 
-            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE)
+            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE || MISSILES.get(i).getX() + MISSILE_RADIUS > X_SCALE || MISSILES.get(i).getX() - MISSILE_RADIUS < 0)
                 MISSILES.remove(i);
         }
     }
