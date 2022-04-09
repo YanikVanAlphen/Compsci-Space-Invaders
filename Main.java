@@ -1,7 +1,11 @@
 public class Main {
     public static void main(String[] args) {
-        Game GameWindow = new Game();
-        GameWindow.createGame();
+        while (true) {
+            Menu menu = new Menu();
+            menu.createGame();
+            menu = null;
+        }
     }
+
 
 }
