@@ -1,5 +1,8 @@
 import java.awt.*;
+import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class Game {
@@ -10,7 +13,7 @@ public class Game {
     public static final double PLAYER_RADIUS = 0.25; //radius of player
     public static final double MISSILE_RADIUS = 0.08; //radius of missile
 
-    public static double VX_ENEMY = 0.060; // speed of enemies
+    public static double VX_ENEMY = 0.30; // speed of enemies
     public static double VX_PLAYER = 0.060; // speed of player
 
     public static final int ENEMY_NUM = 5; //5 by 5 enemy block
@@ -18,23 +21,17 @@ public class Game {
 
     public ArrayList<Missile> MISSILES = new ArrayList<Missile>();
     public static final double MISSILE_SPEED = 0.15;
-    public FileWriter scoreText = new FileWriter("HighScore.txt");
 
     public static long FRAME_COUNT = 0;
 
-    public int LIVES = 3;
+    public int LIVES = 1;
     public int SCORE = 0;
 
     public double LEVELUP = 1.5;
     public double SCORE_INCREASE = 1;
 
-    public static void main(String[] args) {
-        Game g = new Game();  // some wierd case where my class needs a main, will look into it
-    }
-
-
     public void newGame() {
-
+        Menu menu = new Menu();
         StdDraw.clear(Color.BLACK);
 
         StdDraw.setPenColor(StdDraw.RED);
@@ -47,16 +44,13 @@ public class Game {
 
         while (LIVES > 0) {
 
-
             StdDraw.setFont();
             StdDraw.text(9, 9.8, "Lives: " + player.getPlayerLives());
             StdDraw.text(9, 9.5, "Score: " + SCORE);
 
             FRAME_COUNT++;
 
-            if (StdDraw.isKeyPressed(82)) { // 114 = ascii for "r"
-                //System.out.println("RESTART");
-                //player.setPlayerLives(LIVES);
+            if (StdDraw.isKeyPressed(82)) { // 82 = ascii for "r"
                 LIVES = 3;
                 SCORE = 0;
                 VX_ENEMY = 0.060;
@@ -64,14 +58,18 @@ public class Game {
                 SCORE_INCREASE = 1;
 
                 removeMissiles();
-
                 newGame();
+            }
+
+            if (StdDraw.isKeyPressed(81)) { // 81 = ascii for "q"
+                menu.quit();
             }
 
             if (enemyByPlayer(enemies, player)) {
                 System.out.println("RESTART");
                 LIVES--;
                 if (LIVES <= 0) {
+                    writeScore(SCORE);
                     break;
                     //game over
                 }
@@ -89,10 +87,9 @@ public class Game {
             StdDraw.enableDoubleBuffering();
 
             updateEnemies(ENEMY_NUM, enemies);
-            updatePlayer(player);
-            updateMissiles(); //update and draw missile on screen
+            updatePlayer(player); //update
+            updateMissiles();
             destroy(enemies);
-
 
             StdDraw.show();
             StdDraw.pause(20);
@@ -101,10 +98,6 @@ public class Game {
         }
         System.out.println(LIVES + " " + player.getPlayerLives());
 
-    }
-
-    public boolean txtEmpty() {
-        if (scoreText.)
     }
 
     public void removeMissiles() {
@@ -128,12 +121,11 @@ public class Game {
         return answer;
     }
 
-    public void createPlayer(PlayerCharacter player) {
+    public void createPlayer(PlayerCharacter player) { //draws player on canvas
         StdDraw.picture(player.getX(), player.getY(), "images/player.jpg", 1, 1);
-        // StdDraw.filledCircle(player.getX(), player.getY(), 0.25);
     }
 
-    public void createEnemies(int N, Enemy[][] enemies) {
+    public void createEnemies(int N, Enemy[][] enemies) { //Enemy array is created and drawn onto canvas
 
         for (int i = 0; i < N; i++) {    //Create array of Enemy objects
             for (int j = 0; j < N; j++) {
@@ -150,7 +142,7 @@ public class Game {
     }
 
 
-    public void updatePlayer(PlayerCharacter player) {
+    public void updatePlayer(PlayerCharacter player) { //updates position of player due to keys pressed; also fires missiles if space-bar is pressed
 
         if (StdDraw.isKeyPressed(81)) { // rotate left
             if (player.getangle() >= -90) {
@@ -182,11 +174,10 @@ public class Game {
             StdAudio.play("images/missileShoot.wav");
         }
         StdDraw.picture(player.getX(), player.getY(), "images/player.jpg", 1, 1);
-        //StdDraw.filledCircle(player.getX(), player.getY(), PLAYER_RADIUS);
     }
 
 
-    public void updateMissiles() {  // update missiles state
+    public void updateMissiles() {  //update and draw missile on screen
         for (int i = 0; i < MISSILES.size(); i++) {
 
             if (MISSILES.get(i).getangle() == 0) {
@@ -204,7 +195,7 @@ public class Game {
                 System.out.println(MISSILES.get(i).getX() + " " + MISSILES.get(i).getY());
             }
 
-            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE|| MISSILES.get(i).getX() + MISSILE_RADIUS > X_SCALE || MISSILES.get(i).getX() - MISSILE_RADIUS < 0)
+            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE)
                 MISSILES.remove(i);
         }
     }
@@ -268,5 +259,30 @@ public class Game {
 
             }
         }
+    }
+
+    public static void writeScore(int score) { //writes score achieved during the game to text file that stores all scores ever achieved
+        File scoreText = new File("HighScore.txt");
+
+        if (!scoreText.exists()) {
+            try {
+                scoreText.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        FileWriter fwScore = null;
+        try {
+            fwScore = new FileWriter(scoreText, true);
+            PrintWriter pwScore = new PrintWriter(fwScore);
+
+            pwScore.println(score);
+            pwScore.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 }
