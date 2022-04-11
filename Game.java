@@ -204,7 +204,7 @@ public class Game {
                 System.out.println(MISSILES.get(i).getX() + " " + MISSILES.get(i).getY());
             }
 
-            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE)
+            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE|| MISSILES.get(i).getX() + MISSILE_RADIUS > X_SCALE || MISSILES.get(i).getX() - MISSILE_RADIUS < 0)
                 MISSILES.remove(i);
         }
     }
