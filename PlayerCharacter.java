@@ -1,17 +1,17 @@
 public class PlayerCharacter {
     //class for player character - movement and missile instantiation
 
-    // attributes of player character
-    private double X, Y;
-    private int playerLives;
-    private int angle = 0;
+    // Instance Variables:
+    private double X, Y; // x, y coordinates of  centre of player
+    private int angle = 0; //angle player is at due to rotation
 
-    public PlayerCharacter(double x, double y, int lives) {
+    //Constructor:
+    public PlayerCharacter(double x, double y) {
         this.X = x;
         this.Y = y;
-        this.playerLives = lives;
     }
 
+    //Instance Methods:
     public double getX() {
         return X;
     }
@@ -20,11 +20,7 @@ public class PlayerCharacter {
         return Y;
     }
 
-    public int getPlayerLives() {
-        return playerLives;
-    }
-
-    public int getangle() {
+    public int getAngle() {
         return angle;
     }
 
@@ -36,11 +32,7 @@ public class PlayerCharacter {
         Y = y;
     }
 
-    public void setPlayerLives(int lives) {
-        playerLives = lives;
-    }
-
-    public void setangle(int theta) {
+    public void setAngle(int theta) {
         angle = theta;
     }
 

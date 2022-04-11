@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class Game {
+    //class that enables game to function
+
     public static final int X_SCALE = 10; //dividing canvas up horizontally (helps with placement of drawings)
     public static final int Y_SCALE = 10; //dividing canvas up vertically (helps with placement of drawings)
 
@@ -13,22 +15,23 @@ public class Game {
     public static final double PLAYER_RADIUS = 0.25; //radius of player
     public static final double MISSILE_RADIUS = 0.08; //radius of missile
 
-    public static double VX_ENEMY = 0.30; // speed of enemies
+    public static double VX_ENEMY = 0.060; // speed of enemies
     public static double VX_PLAYER = 0.060; // speed of player
 
     public static final int ENEMY_NUM = 5; //5 by 5 enemy block
-    public int ENEMY_KILLED = 0;
+    public int ENEMY_KILLED = 0; // count number of enemies killed to advance to next level
 
-    public ArrayList<Missile> MISSILES = new ArrayList<Missile>();
-    public static final double MISSILE_SPEED = 0.15;
+    public ArrayList<Missile> MISSILES = new ArrayList<Missile>(); // array list of missiles that can be created and removed where necessary
+    public static final double MISSILE_SPEED = 0.15; // speed at which missiles fire
 
-    public static long FRAME_COUNT = 0;
+    public static long FRAME_COUNT = 0; // allows while loop, which keeps the game running, to execute a number of times before missile appears on screen
+    // allows missiles to appear spaced apart
 
-    public int LIVES = 1;
-    public int SCORE = 0;
+    public int LIVES = 3; // player lives
+    public int SCORE = 0; // score while game is running
 
-    public double LEVELUP = 1.5;
-    public double SCORE_INCREASE = 1;
+    public double LEVELUP = 1.5; // enemy speed multiplier when player moves up a level
+    public int SCORE_INCREASE = 1; // score multiplier when player moves up a level
 
     public void newGame() {
         Menu menu = new Menu();
@@ -36,27 +39,24 @@ public class Game {
 
         StdDraw.setPenColor(StdDraw.RED);
 
-        Enemy[][] enemies = new Enemy[ENEMY_NUM][ENEMY_NUM];
+        Enemy[][] enemies = new Enemy[ENEMY_NUM][ENEMY_NUM]; //enemy "block"(array) instantiated
 
-        PlayerCharacter player = new PlayerCharacter(5.0, 0.5, LIVES); //player character instantiated
+        PlayerCharacter player = new PlayerCharacter(5.0, 0.5); //player character instantiated
         createPlayer(player);
         createEnemies(ENEMY_NUM, enemies);
 
         while (LIVES > 0) {
 
             StdDraw.setFont();
-            StdDraw.text(9, 9.8, "Lives: " + player.getPlayerLives());
-            StdDraw.text(9, 9.5, "Score: " + SCORE);
+            StdDraw.text(9, 9.8, "Lives: " + LIVES);
+            StdDraw.text(5, 9.8, "Score: " + SCORE);
+            StdDraw.text(1, 9.8, "Level: " + SCORE_INCREASE);
 
             FRAME_COUNT++;
 
             if (StdDraw.isKeyPressed(82)) { // 82 = ascii for "r"
                 LIVES = 3;
-                SCORE = 0;
-                VX_ENEMY = 0.060;
-                VX_PLAYER = 0.060;
-                SCORE_INCREASE = 1;
-
+                reset();
                 removeMissiles();
                 newGame();
             }
@@ -66,15 +66,23 @@ public class Game {
             }
 
             if (enemyByPlayer(enemies, player)) {
-                System.out.println("RESTART");
+                ENEMY_KILLED = 0;
                 LIVES--;
                 if (LIVES <= 0) {
                     writeScore(SCORE);
+                    reset();
                     break;
                     //game over
                 }
                 newGame();
             }
+
+            StdDraw.enableDoubleBuffering();
+
+            updateEnemies(ENEMY_NUM, enemies);
+            updatePlayer(player);
+            updateMissiles();
+            destroy(enemies);
 
             if (ENEMY_KILLED == (ENEMY_NUM * ENEMY_NUM)) {
                 ENEMY_KILLED = 0;
@@ -84,19 +92,12 @@ public class Game {
                 newGame();
             }
 
-            StdDraw.enableDoubleBuffering();
-
-            updateEnemies(ENEMY_NUM, enemies);
-            updatePlayer(player); //update
-            updateMissiles();
-            destroy(enemies);
-
             StdDraw.show();
             StdDraw.pause(20);
             StdDraw.clear(Color.BLACK);
 
         }
-        System.out.println(LIVES + " " + player.getPlayerLives());
+        //System.out.println(LIVES + " " + player.getPlayerLives());
 
     }
 
@@ -144,15 +145,15 @@ public class Game {
 
     public void updatePlayer(PlayerCharacter player) { //updates position of player due to keys pressed; also fires missiles if space-bar is pressed
 
-        if (StdDraw.isKeyPressed(81)) { // rotate left
-            if (player.getangle() >= -90) {
-                player.setangle(player.getangle() - 1);
+        if (StdDraw.isKeyPressed(65)) { //65 = ascii for 'a'; rotate left
+            if (player.getAngle() >= -90) {
+                player.setAngle(player.getAngle() - 1);
             }
         }
 
-        if (StdDraw.isKeyPressed(69)) { // rotate right
-            if (player.getangle() <= 90) {
-                player.setangle(player.getangle() + 1);
+        if (StdDraw.isKeyPressed(68)) { //68 = ascii for 'd'; rotate right
+            if (player.getAngle() <= 90) {
+                player.setAngle(player.getAngle() + 1);
             }
         }
 
@@ -170,8 +171,8 @@ public class Game {
 
         if (FRAME_COUNT > 5 && StdDraw.isKeyPressed(32)) { // space-bar: 32
             FRAME_COUNT = 0;
-            MISSILES.add(new Missile(player.getX(), player.getY(), true, player.getangle()));
-            StdAudio.play("images/missileShoot.wav");
+            MISSILES.add(new Missile(player.getX(), player.getY(), player.getAngle()));
+            StdAudio.playInBackground("images/missileShoot.wav");
         }
         StdDraw.picture(player.getX(), player.getY(), "images/player.jpg", 1, 1);
     }
@@ -180,20 +181,17 @@ public class Game {
     public void updateMissiles() {  //update and draw missile on screen
         for (int i = 0; i < MISSILES.size(); i++) {
 
-            if (MISSILES.get(i).getangle() == 0) {
+            if (MISSILES.get(i).getAngle() == 0) {
                 MISSILES.get(i).setY(MISSILES.get(i).getY() + MISSILE_SPEED);
             } else {
-                double theta = (double) MISSILES.get(i).getangle() * Math.PI / 180;
+                double theta = (double) MISSILES.get(i).getAngle() * Math.PI / 180;
                 MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta) * MISSILE_SPEED));
                 MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta) * MISSILE_SPEED));
             }
 
-            if (MISSILES.get(i).getActive()) {
-                StdDraw.setPenColor(Color.WHITE);
-                StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY() + PLAYER_RADIUS, MISSILE_RADIUS);
-                StdDraw.setPenColor(Color.RED);
-                System.out.println(MISSILES.get(i).getX() + " " + MISSILES.get(i).getY());
-            }
+            StdDraw.setPenColor(Color.WHITE);
+            StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY() + PLAYER_RADIUS, MISSILE_RADIUS);
+            StdDraw.setPenColor(Color.RED);
 
             if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE)
                 MISSILES.remove(i);
@@ -283,6 +281,12 @@ public class Game {
             e.printStackTrace();
         }
 
+    }
 
+    public void reset() {
+        SCORE = 0;
+        VX_ENEMY = 0.060;
+        VX_PLAYER = 0.060;
+        SCORE_INCREASE = 1;
     }
 }

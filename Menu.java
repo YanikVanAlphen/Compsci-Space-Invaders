@@ -42,7 +42,7 @@ public class Menu {
 
         StdDraw.setFont(font2);
         StdDraw.text(5, 5.5, "Shoot(Space)");
-        StdDraw.text(5, 4.5, "Rotate: Left(q), Right(e)");
+        StdDraw.text(5, 4.5, "Rotate: Left(a), Right(d)");
         StdDraw.text(5, 3.5, "Move: left(left arrow), right(right arrow)");
 
         StdDraw.setFont(font3);
@@ -63,6 +63,17 @@ public class Menu {
 
         if (StdDraw.isKeyPressed(10)) { // 10 = ascii for Enter
             game.newGame();
+            StdDraw.clear(StdDraw.BLACK);
+            StdDraw.setFont(font3);
+            StdDraw.text(5, 5, "GAME OVER");
+            StdDraw.show();
+
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             startMenu();
         } else if (StdDraw.isKeyPressed(81)) { // 81 = ascii for "q"
             quit();

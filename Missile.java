@@ -1,28 +1,24 @@
 public class Missile {
-    //class for player character - movement and missile instantiation
+    //class for missile
 
-    // attributes of player character
-    private double X, Y;
-    private boolean missileIsActive; // is missile eliminated or not
-    private int angle; 
+    // Instance variables:
+    private double X, Y; // x,y coordinates of centre of missile
+    private int angle; //angle of gun according to angle of player (gun attached to player)
 
-    public Missile(double x, double y, boolean active, int theta) {
+    //Constructor:
+    public Missile(double x, double y, int theta) {
         this.X = x;
         this.Y = y;
-        this.missileIsActive = active;
         this.angle = theta;
     }
 
+    //Instance methods:
     public double getX() {
         return X;
     }
 
     public double getY() {
         return Y;
-    }
-
-    public boolean getActive() {
-        return missileIsActive;
     }
 
     public void setX(double x) {
@@ -33,15 +29,11 @@ public class Missile {
         Y = y;
     }
 
-    public void setActive(boolean active) {
-        missileIsActive = active;
-    }
-
-    public int getangle() {
+    public int getAngle() {
         return angle;
     }
 
-    public void setangle( int theta ) {
+    public void setAngle(int theta) {
         angle = theta;
     }
 }

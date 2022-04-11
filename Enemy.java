@@ -1,9 +1,11 @@
 public class Enemy {
+    //class for enemy 
+    
     // Instance Variables:
-    private double X, Y;
-    private boolean enemyIsActive; //has enemy been eliminated or not?
+    private double X, Y; // x, y coordinate of centre of enemy
+    private boolean enemyIsActive; //indicates whether enemy has been eliminated or not
 
-    // Constructor/s:
+    // Constructor:
     public Enemy(double x, double y) {
         this.X = x;
         this.Y = y;
