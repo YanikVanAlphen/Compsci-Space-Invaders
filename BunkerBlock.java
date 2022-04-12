@@ -1,4 +1,4 @@
-public class BunkerBlock {
+public class BunkerBlock { // singular bunker block, many instances of the bunker block make up a full bunker, used to create a degrading effect when a bunker is shot at
     //attributes - width length and active state
     private double Xlength;
     private double Ylength;
