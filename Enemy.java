@@ -1,9 +1,12 @@
+import javax.swing.*;
+
 public class Enemy {
-    //class for enemy 
-    
+    //class for enemy
+
     // Instance Variables:
     private double X, Y; // x, y coordinate of centre of enemy
     private boolean enemyIsActive; //indicates whether enemy has been eliminated or not
+    private ImageIcon enemyPicture = new ImageIcon("images/enemy.png");
 
     // Constructor:
     public Enemy(double x, double y) {
@@ -25,6 +28,10 @@ public class Enemy {
         return enemyIsActive;
     }
 
+    public ImageIcon getEnemyPicture() {
+        return enemyPicture;
+    }
+    
     public void setX(double x) {
         X = x;
     }

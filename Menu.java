@@ -68,7 +68,7 @@ public class Menu {
             StdDraw.setPenColor(StdDraw.RED);
             StdDraw.setFont(font3);
             StdDraw.text(5, 5, "GAME OVER");
-            
+
             StdDraw.show();
 
             try {

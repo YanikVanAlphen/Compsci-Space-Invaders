@@ -39,6 +39,9 @@ public class Game {
     public int SCORE_INCREASE = 1; // score multiplier when player moves up a level
     public double MISSILE_PERIOD = 2.0; // period for enemy missiles to occur
 
+    Bunker bunker1 = new Bunker(1, 2);
+    Bunker bunker2 = new Bunker(1, 2);
+    Bunker bunker3 = new Bunker(1, 2);
 
     public void newGame() {
         Menu menu = new Menu();
@@ -52,6 +55,7 @@ public class Game {
         PlayerCharacter player = new PlayerCharacter(5.0, 0.5); //player character instantiated
         createPlayer(player);
         createEnemies(ENEMY_NUM, enemies);
+        createBunkers();
 
         while (LIVES > 0) {
 
@@ -96,6 +100,7 @@ public class Game {
             updateEnemies(enemies);
             updatePlayer(player);
             updateMissiles();
+            updateBunkers(player);
             destroy(enemies);
 
             if (ENEMY_KILLED == (ENEMY_NUM * ENEMY_NUM)) { //pass to next level when all enemies are destroyed
@@ -154,7 +159,7 @@ public class Game {
     }
 
     public void createPlayer(PlayerCharacter player) { //draws player on canvas
-        StdDraw.picture(player.getX(), player.getY(), "images/player.jpg", 1, 1);
+        StdDraw.picture(player.getX(), player.getY(), player.getPlayerPicture().toString(), 1, 1, (-1) * player.getAngle());
     }
 
     public void createEnemies(int N, Enemy[][] enemies) { //Enemy array is created and drawn onto canvas
@@ -169,23 +174,43 @@ public class Game {
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                StdDraw.filledCircle(enemies[i][j].getX(), enemies[i][j].getY(), ENEMY_RADIUS);
+                StdDraw.picture(enemies[i][j].getX(), enemies[i][j].getY(), enemies[i][j].getEnemyPicture().toString(), 1, 1);
             }
         }
     }
 
+    public void createBunkers() {
+
+        bunker1.placeBunker(1.0, 2.5);
+        placeBunker(bunker1);
+
+        bunker2.placeBunker(4.0, 2.5);
+        placeBunker(bunker2);
+
+        bunker3.placeBunker(7.0, 2.5);
+        placeBunker(bunker3);
+
+    }
+
+    public void placeBunker(Bunker bunker) {
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 5; y++) {
+                StdDraw.filledRectangle(bunker.getXCoord(x, y), bunker.getYCoord(x, y), bunker.getBunkerWidth() / 10, bunker.getBunkerLength() / 6);
+            }
+        }
+    }
 
     public void updatePlayer(PlayerCharacter player) { //updates position of player due to keys pressed; also fires missiles if space-bar is pressed
 
         if (StdDraw.isKeyPressed(65)) { //65 = ascii for 'a'; rotate left
             if (player.getAngle() >= -90) {
-                player.setAngle(player.getAngle() - 1);
+                player.setAngle(player.getAngle() - 5);
             }
         }
 
         if (StdDraw.isKeyPressed(68)) { //68 = ascii for 'd'; rotate right
             if (player.getAngle() <= 90) {
-                player.setAngle(player.getAngle() + 1);
+                player.setAngle(player.getAngle() + 5);
             }
         }
 
@@ -206,28 +231,29 @@ public class Game {
             MISSILES.add(new Missile(player.getX(), player.getY(), player.getAngle()));
             StdAudio.playInBackground("images/missileShoot.wav");
         }
-        StdDraw.picture(player.getX(), player.getY(), "images/player.jpg", 1, 1);
+        StdDraw.picture(player.getX(), player.getY(), player.getPlayerPicture().toString(), 1, 1, (-1) * player.getAngle());
     }
 
 
     public void updateMissiles() {  //update and draw missile on screen
-
         for (int i = 0; i < MISSILES.size(); i++) { //update missile position and display;
+            if (!checkBunkerHit(MISSILES.get(i).getX(), MISSILES.get(i).getY(), i, 1)) {
+                double theta = (double) MISSILES.get(i).getAngle() * Math.PI / 180;
+                MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta) * MISSILE_SPEED));
+                MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta) * MISSILE_SPEED));
 
-            double theta = (double) MISSILES.get(i).getAngle() * Math.PI / 180;
-            MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta) * MISSILE_SPEED));
-            MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta) * MISSILE_SPEED));
-
-            StdDraw.setPenColor(StdDraw.WHITE);
-            StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY(), MISSILE_RADIUS);
+                StdDraw.setPenColor(StdDraw.WHITE);
+                StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY(), MISSILE_RADIUS);
+            }
         }
 
         for (int i = 0; i < ENEMY_MISSILES.size(); i++) { //update enemy missile position and display;
+            if (!checkBunkerHit(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), i, 0)) {
+                ENEMY_MISSILES.get(i).setY(ENEMY_MISSILES.get(i).getY() - ENEMYMISSILE_SPEED);
 
-            ENEMY_MISSILES.get(i).setY(ENEMY_MISSILES.get(i).getY() - ENEMYMISSILE_SPEED);
-
-            StdDraw.setPenColor(StdDraw.YELLOW);
-            StdDraw.filledCircle(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), MISSILE_RADIUS);
+                StdDraw.setPenColor(StdDraw.YELLOW);
+                StdDraw.filledCircle(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), MISSILE_RADIUS);
+            }
         }
 
         for (int i = 0; i < MISSILES.size(); i++) { //remove out of bounds missiles
@@ -242,8 +268,6 @@ public class Game {
 
         /*int a = MISSILES.size();
         int b = ENEMY_MISSILES.size();
-
-
         for (int i = 0; i < a; i++) {    //missile and enemy missile collision
             for (int j = 0; j < b; j++) {
                 if ( Math.sqrt( Math.pow(ENEMY_MISSILES.get(j).getY() - MISSILES.get(i).getY(),2) + Math.pow(ENEMY_MISSILES.get(j).getX() - MISSILES.get(i).getX(),2)) < MISSILE_RADIUS*2){
@@ -255,9 +279,23 @@ public class Game {
                 }
             }
         } */
-
     }
 
+    public void updateBunkers(PlayerCharacter player) {
+        StdDraw.setPenColor(Color.RED);
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 5; y++) {
+                if (bunker1.getActive(x, y))
+                    StdDraw.filledRectangle(bunker1.getXCoord(x, y), bunker1.getYCoord(x, y), bunker1.getBunkerWidth() / 10, bunker1.getBunkerLength() / 6);
+
+                if (bunker2.getActive(x, y))
+                    StdDraw.filledRectangle(bunker2.getXCoord(x, y), bunker2.getYCoord(x, y), bunker2.getBunkerWidth() / 10, bunker2.getBunkerLength() / 6);
+
+                if (bunker3.getActive(x, y))
+                    StdDraw.filledRectangle(bunker3.getXCoord(x, y), bunker3.getYCoord(x, y), bunker3.getBunkerWidth() / 10, bunker3.getBunkerLength() / 6);
+            }
+        }
+    }
 
     public void destroy(Enemy[][] enemies) {
         for (int i = 0; i < ENEMY_NUM; i++) {
@@ -312,7 +350,7 @@ public class Game {
         for (int i = 0; i < ENEMY_NUM; i++) {
             for (int j = 0; j < ENEMY_NUM; j++) {
                 if (enemies[i][j].getActive()) {
-                    StdDraw.filledCircle(enemies[i][j].getX(), enemies[i][j].getY(), ENEMY_RADIUS);
+                    StdDraw.picture(enemies[i][j].getX(), enemies[i][j].getY(), enemies[i][j].getEnemyPicture().toString(), 1, 1);
                 }
 
             }
@@ -330,6 +368,50 @@ public class Game {
             }
         }
 
+    }
+
+    public boolean checkBunkerHit(double missileXPos, double missileYPos, int missileIndex, int missileType) {
+        boolean sentinel = false;
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 5; y++) {
+                if (bunker1.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker1.getBunkerLength() / 10, bunker1.getBunkerWidth() / 6)) {
+                    bunker1.setActive(x, y, false);
+                    if (missileType == 1) {
+                        MISSILES.remove(missileIndex);
+                    }
+                    if (missileType == 0) {
+                        ENEMY_MISSILES.remove(missileIndex);
+                    }
+                    sentinel = true;
+                    break;
+                }
+
+                if (bunker2.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker2.getBunkerLength() / 10, bunker2.getBunkerWidth() / 6)) {
+                    bunker2.setActive(x, y, false);
+                    if (missileType == 1) {
+                        MISSILES.remove(missileIndex);
+                    }
+                    if (missileType == 0) {
+                        ENEMY_MISSILES.remove(missileIndex);
+                    }
+                    sentinel = true;
+                    break;
+                }
+
+                if (bunker3.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker3.getBunkerLength() / 10, bunker3.getBunkerWidth() / 6)) {
+                    bunker3.setActive(x, y, false);
+                    if (missileType == 1) {
+                        MISSILES.remove(missileIndex);
+                    }
+                    if (missileType == 0) {
+                        ENEMY_MISSILES.remove(missileIndex);
+                    }
+                    sentinel = true;
+                    break;
+                }
+            }
+        }
+        return sentinel;
     }
 
     public static void writeScore(int score) { //writes score achieved during the game to text file that stores all scores ever achieved
@@ -362,11 +444,13 @@ public class Game {
         VX_PLAYER = 0.060;
         SCORE_INCREASE = 1;
         MISSILE_PERIOD = 2.0;
+
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 5; y++) {
+                bunker1.setActive(x, y, true);
+                bunker2.setActive(x, y, true);
+                bunker3.setActive(x, y, true);
+            }
+        }
     }
-
-
 }
-
-
-
-
