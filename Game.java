@@ -29,10 +29,7 @@ public class Game {
 
 
     public static long FRAME_COUNT = 0;// allows while loop, which keeps the game running, to execute a number of times before missile appears on screen
-                                       // allows missiles to appear spaced apart
     public static long FRAME_COUNT1 = 0;  // allows enemy missiles to be spaced out
-    public static long FRAME_COUNT2 = 0;                   //frame count for animations
-
 
 
     public int LIVES = 3; // player lives
@@ -45,6 +42,7 @@ public class Game {
 
     public void newGame() {
         Menu menu = new Menu();
+
         StdDraw.clear(Color.BLACK);
 
         StdDraw.setPenColor(StdDraw.RED);
@@ -69,7 +67,7 @@ public class Game {
                 LIVES = 3;
                 reset();
                 removeMissiles();
-                removeENEMYMissiles();
+                removeEnemyMissiles();
                 newGame();
             }
 
@@ -80,22 +78,22 @@ public class Game {
             if (enemyByPlayer(enemies, player)) {  //player killed by enemies
                 ENEMY_KILLED = 0;
                 LIVES--;
-                if (LIVES <= 0) {   //ADD REMOVE MISSILE FUNCTIONS?
-                    gameover();
+                if (LIVES <= 0) {
                     writeScore(SCORE);
                     reset();
                     break;
                     //game over
                 }
+
                 removeMissiles();
-                removeENEMYMissiles();
-                livesdecrease(LIVES);
+                removeEnemyMissiles();
+                menu.livesDecrease(LIVES);
                 newGame();
             }
 
             StdDraw.enableDoubleBuffering();
 
-            updateEnemies(ENEMY_NUM, enemies);
+            updateEnemies(enemies);
             updatePlayer(player);
             updateMissiles();
             destroy(enemies);
@@ -104,10 +102,11 @@ public class Game {
                 ENEMY_KILLED = 0;
                 VX_ENEMY *= LEVELUP;
                 SCORE_INCREASE++;
-                MISSILE_PERIOD *= 0.8; //increase rate of enemy missile fire
+                MISSILE_PERIOD *= 0.8; //increase rate of enemy missile fire as FRAME_COUNT1 has to be bigger than a decreasing amount
+
                 removeMissiles();
-                removeENEMYMissiles();
-                nextlevel(SCORE_INCREASE);
+                removeEnemyMissiles();
+                menu.nextlevel(SCORE_INCREASE);
                 newGame();
             }
 
@@ -116,7 +115,6 @@ public class Game {
             StdDraw.clear(Color.BLACK);
 
         }
-        //System.out.println(LIVES + " " + player.getPlayerLives());
 
     }
 
@@ -126,7 +124,7 @@ public class Game {
         }
     }
 
-    public void removeENEMYMissiles() { //remove all enemy missiles
+    public void removeEnemyMissiles() { //remove all enemy missiles
         for (int i = 0; i < ENEMY_MISSILES.size(); i++) {
             ENEMY_MISSILES.remove(i);
         }
@@ -147,14 +145,12 @@ public class Game {
         }
 
         for (int i = 0; i < ENEMY_MISSILES.size(); i++) { //killed by enemy missiles
-            if ( Math.sqrt( Math.pow(ENEMY_MISSILES.get(i).getY() - player.getY(),2) + Math.pow(ENEMY_MISSILES.get(i).getX() - player.getX(),2)) < MISSILE_RADIUS + PLAYER_RADIUS){
+            if (Math.sqrt(Math.pow(ENEMY_MISSILES.get(i).getY() - player.getY(), 2) + Math.pow(ENEMY_MISSILES.get(i).getX() - player.getX(), 2)) < MISSILE_RADIUS + PLAYER_RADIUS) {
                 answer2 = true;
             }
         }
 
-        if (answer1||answer2)
-            return true;
-        else return false;
+        return answer1 || answer2;
     }
 
     public void createPlayer(PlayerCharacter player) { //draws player on canvas
@@ -162,6 +158,7 @@ public class Game {
     }
 
     public void createEnemies(int N, Enemy[][] enemies) { //Enemy array is created and drawn onto canvas
+        StdDraw.setPenColor(StdDraw.RED);
 
         for (int i = 0; i < N; i++) {    //Create array of Enemy objects
             for (int j = 0; j < N; j++) {
@@ -221,25 +218,20 @@ public class Game {
             MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta) * MISSILE_SPEED));
             MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta) * MISSILE_SPEED));
 
-            StdDraw.setPenColor(Color.WHITE);
+            StdDraw.setPenColor(StdDraw.WHITE);
             StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY(), MISSILE_RADIUS);
-            StdDraw.setPenColor(Color.RED);
-            System.out.println(MISSILES.get(i).getX() + " " + MISSILES.get(i).getY());
-
         }
 
         for (int i = 0; i < ENEMY_MISSILES.size(); i++) { //update enemy missile position and display;
 
             ENEMY_MISSILES.get(i).setY(ENEMY_MISSILES.get(i).getY() - ENEMYMISSILE_SPEED);
-            StdDraw.setPenColor(Color.YELLOW);
-            StdDraw.filledCircle(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), MISSILE_RADIUS);
-            StdDraw.setPenColor(Color.RED);
-            System.out.println(ENEMY_MISSILES.get(i).getX() + " " + ENEMY_MISSILES.get(i).getY());
 
+            StdDraw.setPenColor(StdDraw.YELLOW);
+            StdDraw.filledCircle(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), MISSILE_RADIUS);
         }
 
         for (int i = 0; i < MISSILES.size(); i++) { //remove out of bounds missiles
-            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE|| MISSILES.get(i).getX() + MISSILE_RADIUS > X_SCALE || MISSILES.get(i).getX() - MISSILE_RADIUS < 0)
+            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE || MISSILES.get(i).getX() + MISSILE_RADIUS > X_SCALE || MISSILES.get(i).getX() - MISSILE_RADIUS < 0)
                 MISSILES.remove(i);
         }
 
@@ -291,34 +283,34 @@ public class Game {
         }
     }
 
-    public void updateEnemies(int N, Enemy[][] enemies) {
+    public void updateEnemies(Enemy[][] enemies) {
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
+        StdDraw.setPenColor(StdDraw.RED);
+
+        for (int i = 0; i < ENEMY_NUM; i++) {
+            for (int j = 0; j < ENEMY_NUM; j++) {
                 if ((enemies[i][j].getX() + ENEMY_RADIUS > 10 || enemies[i][j].getX() - ENEMY_RADIUS < 0) && enemies[i][j].getActive() == true) {
                     VX_ENEMY = -VX_ENEMY;
-                    for (int m = 0; m < N; m++) {
-                        for (int n = 0; n < N; n++) {
+                    for (int m = 0; m < ENEMY_NUM; m++) {
+                        for (int n = 0; n < ENEMY_NUM; n++) {
                             enemies[m][n].setY(enemies[m][n].getY() - ENEMY_RADIUS);
                         }
                     }
-                    i = N;
-                    j = N;
+                    i = ENEMY_NUM;
+                    j = ENEMY_NUM;
                 }
             }
         }
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
+        for (int i = 0; i < ENEMY_NUM; i++) {
+            for (int j = 0; j < ENEMY_NUM; j++) {
                 enemies[i][j].setX(enemies[i][j].getX() + VX_ENEMY);
-                // System.out.println(enemies[i][j].getX() + " " + enemies[i][j].getY()); //Check for position of enemy objects in array
-
             }
         }
 
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
+        for (int i = 0; i < ENEMY_NUM; i++) {
+            for (int j = 0; j < ENEMY_NUM; j++) {
                 if (enemies[i][j].getActive()) {
                     StdDraw.filledCircle(enemies[i][j].getX(), enemies[i][j].getY(), ENEMY_RADIUS);
                 }
@@ -326,10 +318,10 @@ public class Game {
             }
         }
 
-        if ( !(MISSILE_PERIOD == 2.0) && FRAME_COUNT1 > MISSILE_PERIOD*40) { //creates random enemy missile
-            for (int i = 0; i < N*N; i++) {
-                int n = (int) (Math.random()*N);
-                int m = (int) (Math.random()*N);
+        if ((MISSILE_PERIOD != 2.0) && FRAME_COUNT1 > MISSILE_PERIOD * 40) { //creates random enemy missile
+            for (int i = 0; i < ENEMY_NUM * ENEMY_NUM; i++) {
+                int n = (int) (Math.random() * (ENEMY_NUM));
+                int m = (int) (Math.random() * (ENEMY_NUM));
                 if (enemies[n][m].getActive()) {
                     ENEMY_MISSILES.add(new Missile(enemies[n][m].getX(), enemies[n][m].getY(), 0));
                     FRAME_COUNT1 = 0;
@@ -372,71 +364,9 @@ public class Game {
         MISSILE_PERIOD = 2.0;
     }
 
-    public static void gameover() { //animation for game over
-        Font font1 = new Font("Serif", Font.BOLD, 50);
-        StdDraw.setFont(font1);
-        StdDraw.setPenColor(StdDraw.BOOK_RED);
-
-        while (FRAME_COUNT2 < 110) {
-
-            StdDraw.clear(Color.BLACK);
-            StdDraw.enableDoubleBuffering();
-
-            if ((FRAME_COUNT2 < 20) || ((FRAME_COUNT2 > 30) && (FRAME_COUNT2 < 50)) || ((FRAME_COUNT2 > 60) && (FRAME_COUNT2 < 80)) || ((FRAME_COUNT2 > 90) && (FRAME_COUNT2 < 110)) )
-                StdDraw.text(5, 6.5, "GAME OVER");
-
-            FRAME_COUNT2++;
-            StdDraw.show();
-            StdDraw.pause(20);
-
-        }
-        FRAME_COUNT2 = 0;
-    }
-
-    public static void nextlevel(int level) { //animation for next level
-        Font font1 = new Font("Serif", Font.BOLD, 50);
-        StdDraw.setFont(font1);
-        StdDraw.setPenColor(StdDraw.GREEN);
-
-        while (FRAME_COUNT2 < 40) {
-
-            StdDraw.clear(Color.BLACK);
-            StdDraw.enableDoubleBuffering();
-
-            if (FRAME_COUNT2 < 20)
-                StdDraw.text(5, 6.5, "LEVEL: " + (level - 1));
-            else
-                StdDraw.text(5, 6.5, "LEVEL: " + (level));
-
-            FRAME_COUNT2++;
-            StdDraw.show();
-            StdDraw.pause(20);
-
-        }
-        FRAME_COUNT2 = 0;
-    }
-
-    public static void livesdecrease(int lives) { //animation for lives decrease
-        Font font1 = new Font("Serif", Font.BOLD, 50);
-        StdDraw.setFont(font1);
-
-        while (FRAME_COUNT2 < 60) {
-
-            StdDraw.clear(Color.BLACK);
-            StdDraw.enableDoubleBuffering();
-
-            if (FRAME_COUNT2 < 30)
-                StdDraw.text(5, 6.5, "LIVES: " + (lives + 1));
-            else
-                StdDraw.text(5, 6.5, "LIVES: " + lives);
-
-            FRAME_COUNT2++;
-            StdDraw.show();
-            StdDraw.pause(20);
-
-        }
-        FRAME_COUNT2 = 0;
-    }
-
 
 }
+
+
+
+

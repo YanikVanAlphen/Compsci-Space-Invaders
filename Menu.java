@@ -63,10 +63,13 @@ public class Menu {
 
         if (StdDraw.isKeyPressed(10)) { // 10 = ascii for Enter
             game.newGame();
-            /*StdDraw.clear(StdDraw.BLACK);
+
+            StdDraw.clear(StdDraw.BLACK);
+            StdDraw.setPenColor(StdDraw.RED);
             StdDraw.setFont(font3);
             StdDraw.text(5, 5, "GAME OVER");
-            StdDraw.show();*/
+            
+            StdDraw.show();
 
             try {
                 Thread.sleep(2000);
@@ -157,5 +160,42 @@ public class Menu {
         }
 
         createGame();
+    }
+
+    public void livesDecrease(int lives) { //animation for lives decrease
+        StdDraw.clear(StdDraw.BLACK);
+
+        Font font1 = new Font("Serif", Font.BOLD, 50);
+        StdDraw.setFont(font1);
+        StdDraw.setPenColor(StdDraw.RED);
+        StdDraw.text(5, 5, "LIVES: " + lives);
+
+        StdDraw.show();
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void nextlevel(int level) { //animation for next level
+        StdDraw.clear(Color.BLACK);
+
+        Font font1 = new Font("Serif", Font.BOLD, 50);
+        StdDraw.setFont(font1);
+        StdDraw.setPenColor(StdDraw.GREEN);
+
+        StdDraw.text(5, 5, "LEVEL: " + level);
+
+        StdDraw.show();
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
