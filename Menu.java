@@ -63,10 +63,10 @@ public class Menu {
 
         if (StdDraw.isKeyPressed(10)) { // 10 = ascii for Enter
             game.newGame();
-            StdDraw.clear(StdDraw.BLACK);
+            /*StdDraw.clear(StdDraw.BLACK);
             StdDraw.setFont(font3);
             StdDraw.text(5, 5, "GAME OVER");
-            StdDraw.show();
+            StdDraw.show();*/
 
             try {
                 Thread.sleep(2000);
