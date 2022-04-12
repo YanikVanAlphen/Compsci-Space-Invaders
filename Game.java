@@ -39,11 +39,12 @@ public class Game {
     public int SCORE_INCREASE = 1; // score multiplier when player moves up a level
     public double MISSILE_PERIOD = 2.0; // period for enemy missiles to occur
 
+    // initialization of three bunkers, passing length and width of bunker to the constructor
     Bunker bunker1 = new Bunker(1, 2);
     Bunker bunker2 = new Bunker(1, 2);
     Bunker bunker3 = new Bunker(1, 2);
 
-    public void newGame() {
+    public void newGame() { // method wherein the game runs
         Menu menu = new Menu();
 
         StdDraw.clear(Color.BLACK);
@@ -53,7 +54,7 @@ public class Game {
         Enemy[][] enemies = new Enemy[ENEMY_NUM][ENEMY_NUM]; //enemy "block"(array) instantiated
 
         PlayerCharacter player = new PlayerCharacter(5.0, 0.5); //player character instantiated
-        createPlayer(player);
+        createPlayer(player); // draw player to screen
         createEnemies(ENEMY_NUM, enemies);
         createBunkers();
 
@@ -135,7 +136,7 @@ public class Game {
         }
     }
 
-    public boolean enemyByPlayer(Enemy[][] enemies, PlayerCharacter player) {
+    public boolean enemyByPlayer(Enemy[][] enemies, PlayerCharacter player) { // checks for cases wherein a player is killed
         boolean answer2 = false;
         boolean answer1 = false;
 
@@ -179,8 +180,8 @@ public class Game {
         }
     }
 
-    public void createBunkers() {
-
+    public void createBunkers() { // passing reference x- and y- coordinates to each bunker. These coordinates are the coordinates of the top- leftmost bunker block
+                                  // the rest of the bunker blocks receive coordinates based off of the reference coordinates
         bunker1.placeBunker(1.0, 2.5);
         placeBunker(bunker1);
 
@@ -192,7 +193,7 @@ public class Game {
 
     }
 
-    public void placeBunker(Bunker bunker) {
+    public void placeBunker(Bunker bunker) { // draw bunkers on screen
         for (int x = 0; x < 3; x++) {
             for (int y = 0; y < 5; y++) {
                 StdDraw.filledRectangle(bunker.getXCoord(x, y), bunker.getYCoord(x, y), bunker.getBunkerWidth() / 10, bunker.getBunkerLength() / 6);
@@ -200,15 +201,15 @@ public class Game {
         }
     }
 
-    public void updatePlayer(PlayerCharacter player) { //updates position of player due to keys pressed; also fires missiles if space-bar is pressed
+    public void updatePlayer(PlayerCharacter player) { //updates position of player according to keys pressed; also fires missiles if space-bar is pressed
 
-        if (StdDraw.isKeyPressed(65)) { //65 = ascii for 'a'; rotate left
+        if (StdDraw.isKeyPressed(65)) { //65 = keycode for 'a'; rotate left
             if (player.getAngle() >= -90) {
                 player.setAngle(player.getAngle() - 5);
             }
         }
 
-        if (StdDraw.isKeyPressed(68)) { //68 = ascii for 'd'; rotate right
+        if (StdDraw.isKeyPressed(68)) { //68 = keycode for 'd'; rotate right
             if (player.getAngle() <= 90) {
                 player.setAngle(player.getAngle() + 5);
             }
@@ -281,7 +282,7 @@ public class Game {
         } */
     }
 
-    public void updateBunkers(PlayerCharacter player) {
+    public void updateBunkers(PlayerCharacter player) { //updates bunker positions, omits inactive bunkers (bunkers that have been shot already)
         StdDraw.setPenColor(Color.RED);
         for (int x = 0; x < 3; x++) {
             for (int y = 0; y < 5; y++) {
@@ -297,7 +298,7 @@ public class Game {
         }
     }
 
-    public void destroy(Enemy[][] enemies) {
+    public void destroy(Enemy[][] enemies) { // event that an enemy is shot by a missile
         for (int i = 0; i < ENEMY_NUM; i++) {
             for (int j = 0; j < ENEMY_NUM; j++) {
                 for (int k = 0; k < MISSILES.size(); k++) {
@@ -321,7 +322,7 @@ public class Game {
         }
     }
 
-    public void updateEnemies(Enemy[][] enemies) {
+    public void updateEnemies(Enemy[][] enemies) { // update enemy position, omits inactive enemies that have already been shot
 
         StdDraw.setPenColor(StdDraw.RED);
 
@@ -370,7 +371,7 @@ public class Game {
 
     }
 
-    public boolean checkBunkerHit(double missileXPos, double missileYPos, int missileIndex, int missileType) {
+    public boolean checkBunkerHit(double missileXPos, double missileYPos, int missileIndex, int missileType) { // compares coordinates of missiles and bunker blocks, checks if a bunker block is hit
         boolean sentinel = false;
         for (int x = 0; x < 3; x++) {
             for (int y = 0; y < 5; y++) {
@@ -438,7 +439,7 @@ public class Game {
 
     }
 
-    public void reset() {
+    public void reset() { // resets initial values of game
         SCORE = 0;
         VX_ENEMY = 0.060;
         VX_PLAYER = 0.060;
