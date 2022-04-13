@@ -25,7 +25,7 @@ public class Game {
     public ArrayList<Missile> ENEMY_MISSILES = new ArrayList<Missile>(); // array list of enemy missiles
 
     public static final double MISSILE_SPEED = 0.15; // speed at which missiles fire
-    public static final double ENEMYMISSILE_SPEED = 0.08;
+    public static final double ENEMYMISSILE_SPEED = 0.08; //speed at which enemy missiles fire
 
 
     public static long FRAME_COUNT = 0;// allows while loop, which keeps the game running, to execute a number of times before missile appears on screen
@@ -39,7 +39,7 @@ public class Game {
     public int SCORE_INCREASE = 1; // score multiplier when player moves up a level
     public double MISSILE_PERIOD = 2.0; // period for enemy missiles to occur
 
-    // initialization of three bunkers, passing length and width of bunker to the constructor
+    // initialization of three bunkers, passing height and width of bunker to the constructor
     Bunker bunker1 = new Bunker(1, 2);
     Bunker bunker2 = new Bunker(1, 2);
     Bunker bunker3 = new Bunker(1, 2);
@@ -86,8 +86,7 @@ public class Game {
                 if (LIVES <= 0) {
                     writeScore(SCORE);
                     reset();
-                    break;
-                    //game over
+                    break;  //game over; breaks out of loop
                 }
 
                 removeMissiles();
@@ -124,45 +123,6 @@ public class Game {
 
     }
 
-    public void removeMissiles() { //remove all missiles
-        for (int i = 0; i < MISSILES.size(); i++) {
-            MISSILES.remove(i);
-        }
-    }
-
-    public void removeEnemyMissiles() { //remove all enemy missiles
-        for (int i = 0; i < ENEMY_MISSILES.size(); i++) {
-            ENEMY_MISSILES.remove(i);
-        }
-    }
-
-    public boolean enemyByPlayer(Enemy[][] enemies, PlayerCharacter player) { // checks for cases wherein a player is killed
-        boolean answer2 = false;
-        boolean answer1 = false;
-
-        for (int i = 0; i < ENEMY_NUM; i++) { //killed by enemies
-            for (int j = 0; j < ENEMY_NUM; j++) {
-                if ((enemies[i][j].getActive()) && (enemies[i][j].getY() - ENEMY_RADIUS < player.getY() + 1)) {
-                    answer1 = true;
-                    i = ENEMY_NUM;
-                    j = ENEMY_NUM;
-                }
-            }
-        }
-
-        for (int i = 0; i < ENEMY_MISSILES.size(); i++) { //killed by enemy missiles
-            if (Math.sqrt(Math.pow(ENEMY_MISSILES.get(i).getY() - player.getY(), 2) + Math.pow(ENEMY_MISSILES.get(i).getX() - player.getX(), 2)) < MISSILE_RADIUS + PLAYER_RADIUS) {
-                answer2 = true;
-            }
-        }
-
-        return answer1 || answer2;
-    }
-
-    public void createPlayer(PlayerCharacter player) { //draws player on canvas
-        StdDraw.picture(player.getX(), player.getY(), player.getPlayerPicture().toString(), 1, 1, (-1) * player.getAngle());
-    }
-
     public void createEnemies(int N, Enemy[][] enemies) { //Enemy array is created and drawn onto canvas
         StdDraw.setPenColor(StdDraw.RED);
 
@@ -176,148 +136,6 @@ public class Game {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 StdDraw.picture(enemies[i][j].getX(), enemies[i][j].getY(), enemies[i][j].getEnemyPicture().toString(), 1, 1);
-            }
-        }
-    }
-
-    public void createBunkers() { // passing reference x- and y- coordinates to each bunker. These coordinates are the coordinates of the top- leftmost bunker block
-                                  // the rest of the bunker blocks receive coordinates based off of the reference coordinates
-        bunker1.placeBunker(1.0, 2.5);
-        placeBunker(bunker1);
-
-        bunker2.placeBunker(4.0, 2.5);
-        placeBunker(bunker2);
-
-        bunker3.placeBunker(7.0, 2.5);
-        placeBunker(bunker3);
-
-    }
-
-    public void placeBunker(Bunker bunker) { // draw bunkers on screen
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < 5; y++) {
-                StdDraw.filledRectangle(bunker.getXCoord(x, y), bunker.getYCoord(x, y), bunker.getBunkerWidth() / 10, bunker.getBunkerLength() / 6);
-            }
-        }
-    }
-
-    public void updatePlayer(PlayerCharacter player) { //updates position of player according to keys pressed; also fires missiles if space-bar is pressed
-
-        if (StdDraw.isKeyPressed(65)) { //65 = keycode for 'a'; rotate left
-            if (player.getAngle() >= -90) {
-                player.setAngle(player.getAngle() - 5);
-            }
-        }
-
-        if (StdDraw.isKeyPressed(68)) { //68 = keycode for 'd'; rotate right
-            if (player.getAngle() <= 90) {
-                player.setAngle(player.getAngle() + 5);
-            }
-        }
-
-        if (StdDraw.isKeyPressed(37)) { // left arrow :37
-            if (player.getX() >= 0 + PLAYER_RADIUS) {
-                player.setX(player.getX() - 2 * Math.abs(VX_PLAYER));// move left
-            }
-        }
-
-        if (StdDraw.isKeyPressed(39)) { // right arrow: 39
-            if (player.getX() <= X_SCALE - PLAYER_RADIUS)
-                player.setX(player.getX() + 2 * Math.abs(VX_PLAYER));// move right
-
-        }
-
-        if (FRAME_COUNT > 5 && StdDraw.isKeyPressed(32)) { // space-bar: 32
-            FRAME_COUNT = 0;
-            MISSILES.add(new Missile(player.getX(), player.getY(), player.getAngle()));
-            StdAudio.playInBackground("images/missileShoot.wav");
-        }
-        StdDraw.picture(player.getX(), player.getY(), player.getPlayerPicture().toString(), 1, 1, (-1) * player.getAngle());
-    }
-
-
-    public void updateMissiles() {  //update and draw missile on screen
-        for (int i = 0; i < MISSILES.size(); i++) { //update missile position and display;
-            if (!checkBunkerHit(MISSILES.get(i).getX(), MISSILES.get(i).getY(), i, 1)) {
-                double theta = (double) MISSILES.get(i).getAngle() * Math.PI / 180;
-                MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta) * MISSILE_SPEED));
-                MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta) * MISSILE_SPEED));
-
-                StdDraw.setPenColor(StdDraw.WHITE);
-                StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY(), MISSILE_RADIUS);
-            }
-        }
-
-        for (int i = 0; i < ENEMY_MISSILES.size(); i++) { //update enemy missile position and display;
-            if (!checkBunkerHit(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), i, 0)) {
-                ENEMY_MISSILES.get(i).setY(ENEMY_MISSILES.get(i).getY() - ENEMYMISSILE_SPEED);
-
-                StdDraw.setPenColor(StdDraw.YELLOW);
-                StdDraw.filledCircle(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), MISSILE_RADIUS);
-            }
-        }
-
-        for (int i = 0; i < MISSILES.size(); i++) { //remove out of bounds missiles
-            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE || MISSILES.get(i).getX() + MISSILE_RADIUS > X_SCALE || MISSILES.get(i).getX() - MISSILE_RADIUS < 0)
-                MISSILES.remove(i);
-        }
-
-        for (int i = 0; i < ENEMY_MISSILES.size(); i++) { // remove out of bounds enemy missiles
-            if ((ENEMY_MISSILES.get(i).getY() - MISSILE_RADIUS) < 0)
-                ENEMY_MISSILES.remove(i);
-        }
-
-        /*int a = MISSILES.size();
-        int b = ENEMY_MISSILES.size();
-        for (int i = 0; i < a; i++) {    //missile and enemy missile collision
-            for (int j = 0; j < b; j++) {
-                if ( Math.sqrt( Math.pow(ENEMY_MISSILES.get(j).getY() - MISSILES.get(i).getY(),2) + Math.pow(ENEMY_MISSILES.get(j).getX() - MISSILES.get(i).getX(),2)) < MISSILE_RADIUS*2){
-                    ENEMY_MISSILES.remove(j);
-                    MISSILES.remove(i);
-                    SCORE += 5;
-                    i = a;
-                    j = b;
-                }
-            }
-        } */
-    }
-
-    public void updateBunkers(PlayerCharacter player) { //updates bunker positions, omits inactive bunkers (bunkers that have been shot already)
-        StdDraw.setPenColor(Color.RED);
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < 5; y++) {
-                if (bunker1.getActive(x, y))
-                    StdDraw.filledRectangle(bunker1.getXCoord(x, y), bunker1.getYCoord(x, y), bunker1.getBunkerWidth() / 10, bunker1.getBunkerLength() / 6);
-
-                if (bunker2.getActive(x, y))
-                    StdDraw.filledRectangle(bunker2.getXCoord(x, y), bunker2.getYCoord(x, y), bunker2.getBunkerWidth() / 10, bunker2.getBunkerLength() / 6);
-
-                if (bunker3.getActive(x, y))
-                    StdDraw.filledRectangle(bunker3.getXCoord(x, y), bunker3.getYCoord(x, y), bunker3.getBunkerWidth() / 10, bunker3.getBunkerLength() / 6);
-            }
-        }
-    }
-
-    public void destroy(Enemy[][] enemies) { // event that an enemy is shot by a missile
-        for (int i = 0; i < ENEMY_NUM; i++) {
-            for (int j = 0; j < ENEMY_NUM; j++) {
-                for (int k = 0; k < MISSILES.size(); k++) {
-                    Enemy e = enemies[i][j];
-                    Missile m = MISSILES.get(k);
-
-                    if (e.getActive()) {
-                        if ((m.getX() > e.getX() - ENEMY_RADIUS - MISSILE_RADIUS) &&
-                                (m.getX() < e.getX() + ENEMY_RADIUS + MISSILE_RADIUS) &&
-                                (m.getY() > e.getY() - ENEMY_RADIUS - MISSILE_RADIUS) &&
-                                (m.getY() < e.getY() + ENEMY_RADIUS + MISSILE_RADIUS)) {
-                            MISSILES.remove(k);
-                            e.setActive(false);
-                            SCORE += (SCORE_INCREASE * 10);
-                            ENEMY_KILLED++;
-                            StdAudio.playInBackground("images/missileExplode.wav");
-                        }
-                    }
-                }
             }
         }
     }
@@ -371,11 +189,177 @@ public class Game {
 
     }
 
+    public boolean enemyByPlayer(Enemy[][] enemies, PlayerCharacter player) { // checks for cases wherein a player is killed
+        boolean answer2 = false;
+        boolean answer1 = false;
+
+        for (int i = 0; i < ENEMY_NUM; i++) { //killed by enemies
+            for (int j = 0; j < ENEMY_NUM; j++) {
+                if ((enemies[i][j].getActive()) && (enemies[i][j].getY() - ENEMY_RADIUS < player.getY() + 1)) {
+                    answer1 = true;
+                    i = ENEMY_NUM;
+                    j = ENEMY_NUM;
+                }
+            }
+        }
+
+        for (int i = 0; i < ENEMY_MISSILES.size(); i++) { //killed by enemy missiles
+            if (Math.sqrt(Math.pow(ENEMY_MISSILES.get(i).getY() - player.getY(), 2) + Math.pow(ENEMY_MISSILES.get(i).getX() - player.getX(), 2)) < MISSILE_RADIUS + PLAYER_RADIUS) {
+                answer2 = true;
+            }
+        }
+
+        return answer1 || answer2;
+    }
+
+    public void removeEnemyMissiles() { //remove all enemy missiles
+        for (int i = 0; i < ENEMY_MISSILES.size(); i++) {
+            ENEMY_MISSILES.remove(i);
+        }
+    }
+
+    public void destroy(Enemy[][] enemies) { // event that an enemy is shot by a missile
+        for (int i = 0; i < ENEMY_NUM; i++) {
+            for (int j = 0; j < ENEMY_NUM; j++) {
+                for (int k = 0; k < MISSILES.size(); k++) {
+                    Enemy e = enemies[i][j];
+                    Missile m = MISSILES.get(k);
+
+                    if (e.getActive()) {
+                        if ((m.getX() > e.getX() - ENEMY_RADIUS - MISSILE_RADIUS) &&
+                                (m.getX() < e.getX() + ENEMY_RADIUS + MISSILE_RADIUS) &&
+                                (m.getY() > e.getY() - ENEMY_RADIUS - MISSILE_RADIUS) &&
+                                (m.getY() < e.getY() + ENEMY_RADIUS + MISSILE_RADIUS)) {
+                            MISSILES.remove(k);
+                            e.setActive(false);
+                            SCORE += (SCORE_INCREASE * 10);
+                            ENEMY_KILLED++;
+                            StdAudio.playInBackground("images/missileExplode.wav");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void createPlayer(PlayerCharacter player) { //draws player on canvas
+        StdDraw.picture(player.getX(), player.getY(), player.getPlayerPicture().toString(), 1, 1, (-1) * player.getAngle());
+    }
+
+    public void updatePlayer(PlayerCharacter player) { //updates position of player according to keys pressed; also fires missiles if space-bar is pressed
+
+        if (StdDraw.isKeyPressed(65)) { //65 = keycode for 'a'; rotate left
+            if (player.getAngle() >= -90) {
+                player.setAngle(player.getAngle() - 5);
+            }
+        }
+
+        if (StdDraw.isKeyPressed(68)) { //68 = keycode for 'd'; rotate right
+            if (player.getAngle() <= 90) {
+                player.setAngle(player.getAngle() + 5);
+            }
+        }
+
+        if (StdDraw.isKeyPressed(37)) { // left arrow :37
+            if (player.getX() >= 0 + PLAYER_RADIUS) {
+                player.setX(player.getX() - 2 * Math.abs(VX_PLAYER));// move left
+            }
+        }
+
+        if (StdDraw.isKeyPressed(39)) { // right arrow: 39
+            if (player.getX() <= X_SCALE - PLAYER_RADIUS)
+                player.setX(player.getX() + 2 * Math.abs(VX_PLAYER));// move right
+
+        }
+
+        if (FRAME_COUNT > 5 && StdDraw.isKeyPressed(32)) { // space-bar: 32
+            FRAME_COUNT = 0;
+            MISSILES.add(new Missile(player.getX(), player.getY(), player.getAngle()));
+            StdAudio.playInBackground("images/missileShoot.wav");
+        }
+        StdDraw.picture(player.getX(), player.getY(), player.getPlayerPicture().toString(), 1, 1, (-1) * player.getAngle());
+    }
+
+    public void updateMissiles() {  //update and draw missile on screen
+        for (int i = 0; i < MISSILES.size(); i++) { //update missile position and display;
+            if (!checkBunkerHit(MISSILES.get(i).getX(), MISSILES.get(i).getY(), i, 1)) {
+                double theta = (double) MISSILES.get(i).getAngle() * Math.PI / 180;
+                MISSILES.get(i).setX(MISSILES.get(i).getX() + (Math.sin(theta) * MISSILE_SPEED));
+                MISSILES.get(i).setY(MISSILES.get(i).getY() + (Math.cos(theta) * MISSILE_SPEED));
+
+                StdDraw.setPenColor(StdDraw.WHITE);
+                StdDraw.filledCircle(MISSILES.get(i).getX(), MISSILES.get(i).getY(), MISSILE_RADIUS);
+            }
+        }
+
+        for (int i = 0; i < ENEMY_MISSILES.size(); i++) { //update enemy missile position and display;
+            if (!checkBunkerHit(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), i, 0)) {
+                ENEMY_MISSILES.get(i).setY(ENEMY_MISSILES.get(i).getY() - ENEMYMISSILE_SPEED);
+
+                StdDraw.setPenColor(StdDraw.YELLOW);
+                StdDraw.filledCircle(ENEMY_MISSILES.get(i).getX(), ENEMY_MISSILES.get(i).getY(), MISSILE_RADIUS);
+            }
+        }
+
+        for (int i = 0; i < MISSILES.size(); i++) { //remove out of bounds missiles
+            if (MISSILES.get(i).getY() + MISSILE_RADIUS > Y_SCALE || MISSILES.get(i).getX() + MISSILE_RADIUS > X_SCALE || MISSILES.get(i).getX() - MISSILE_RADIUS < 0)
+                MISSILES.remove(i);
+        }
+
+        for (int i = 0; i < ENEMY_MISSILES.size(); i++) { //remove out of bounds enemy missiles
+            if ((ENEMY_MISSILES.get(i).getY() - MISSILE_RADIUS) < 0)
+                ENEMY_MISSILES.remove(i);
+        }
+    }
+
+    public void removeMissiles() { //remove all missiles
+        for (int i = 0; i < MISSILES.size(); i++) {
+            MISSILES.remove(i);
+        }
+    }
+
+    public void createBunkers() { // passing reference x- and y- coordinates to each bunker. These coordinates are the coordinates of the top- leftmost bunker block
+        // the rest of the bunker blocks receive coordinates based off of the reference coordinates
+        bunker1.placeBunker(1.0, 2.5);
+        placeBunker(bunker1);
+
+        bunker2.placeBunker(4.0, 2.5);
+        placeBunker(bunker2);
+
+        bunker3.placeBunker(7.0, 2.5);
+        placeBunker(bunker3);
+
+    }
+
+    public void placeBunker(Bunker bunker) { // draw bunkers on screen
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 5; y++) {
+                StdDraw.filledRectangle(bunker.getXCoord(x, y), bunker.getYCoord(x, y), bunker.getBunkerWidth() / 10, bunker.getBunkerHeight() / 6);
+            }
+        }
+    }
+
+    public void updateBunkers(PlayerCharacter player) { //updates bunker positions, omits inactive bunkers (bunkers that have been shot already)
+        StdDraw.setPenColor(Color.RED);
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 5; y++) {
+                if (bunker1.getActive(x, y))
+                    StdDraw.filledRectangle(bunker1.getXCoord(x, y), bunker1.getYCoord(x, y), bunker1.getBunkerWidth() / 10, bunker1.getBunkerHeight() / 6);
+
+                if (bunker2.getActive(x, y))
+                    StdDraw.filledRectangle(bunker2.getXCoord(x, y), bunker2.getYCoord(x, y), bunker2.getBunkerWidth() / 10, bunker2.getBunkerHeight() / 6);
+
+                if (bunker3.getActive(x, y))
+                    StdDraw.filledRectangle(bunker3.getXCoord(x, y), bunker3.getYCoord(x, y), bunker3.getBunkerWidth() / 10, bunker3.getBunkerHeight() / 6);
+            }
+        }
+    }
+
     public boolean checkBunkerHit(double missileXPos, double missileYPos, int missileIndex, int missileType) { // compares coordinates of missiles and bunker blocks, checks if a bunker block is hit
         boolean sentinel = false;
         for (int x = 0; x < 3; x++) {
             for (int y = 0; y < 5; y++) {
-                if (bunker1.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker1.getBunkerLength() / 10, bunker1.getBunkerWidth() / 6)) {
+                if (bunker1.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker1.getBunkerHeight() / 10, bunker1.getBunkerWidth() / 6)) {
                     bunker1.setActive(x, y, false);
                     if (missileType == 1) {
                         MISSILES.remove(missileIndex);
@@ -387,7 +371,7 @@ public class Game {
                     break;
                 }
 
-                if (bunker2.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker2.getBunkerLength() / 10, bunker2.getBunkerWidth() / 6)) {
+                if (bunker2.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker2.getBunkerHeight() / 10, bunker2.getBunkerWidth() / 6)) {
                     bunker2.setActive(x, y, false);
                     if (missileType == 1) {
                         MISSILES.remove(missileIndex);
@@ -399,7 +383,7 @@ public class Game {
                     break;
                 }
 
-                if (bunker3.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker3.getBunkerLength() / 10, bunker3.getBunkerWidth() / 6)) {
+                if (bunker3.checkCollision(x, y, missileXPos, missileYPos, MISSILE_RADIUS, bunker3.getBunkerHeight() / 10, bunker3.getBunkerWidth() / 6)) {
                     bunker3.setActive(x, y, false);
                     if (missileType == 1) {
                         MISSILES.remove(missileIndex);

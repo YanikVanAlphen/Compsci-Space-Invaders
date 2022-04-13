@@ -1,17 +1,17 @@
 public class Bunker {
     BunkerBlock[][] bunkerArray = new BunkerBlock[3][5]; // Bunker class is comprised out of a 2D array of BunkerBlock instances
-    private double bunkerLength; // length of  whole bunker
+    private double bunkerHeight; // length of  whole bunker
     private double bunkerWidth;  // width of whole bunker
 
-    public Bunker(double length, double width) {
-        this.bunkerLength = length;
+    public Bunker(double height, double width) {
+        this.bunkerHeight = height;
         this.bunkerWidth = width;
 
         createBunker();
     }
 
-    public double getBunkerLength() {
-        return bunkerLength;
+    public double getBunkerHeight() {
+        return bunkerHeight;
     }
 
     public double getBunkerWidth() {
@@ -21,7 +21,7 @@ public class Bunker {
     public void createBunker() { // initialize new Bunker
         for (int x = 0; x < 3; x++) {
             for (int y = 0; y < 5; y++) {
-                bunkerArray[x][y] = new BunkerBlock(bunkerWidth / 5, bunkerLength / 3, true);
+                bunkerArray[x][y] = new BunkerBlock(bunkerWidth / 5, bunkerHeight / 3, true);
             }
         }
     }
@@ -37,11 +37,11 @@ public class Bunker {
     }
 
     // using same logic as with collision of missile and enemies, method checks if any given missile is within the hitbox of a bunker block
-    public boolean checkCollision(int xIndex, int yIndex, double missileXPos, double missileYPos, double missileRadius, double bunkerBlockLength, double bunkerBlockWidth) {
-        if ((missileXPos > bunkerArray[xIndex][yIndex].getXPos() - bunkerBlockWidth - missileRadius) &&
-                (missileXPos < bunkerArray[xIndex][yIndex].getXPos() + bunkerBlockWidth + missileRadius) &&
-                (missileYPos > bunkerArray[xIndex][yIndex].getYPos() - bunkerBlockLength - missileRadius) &&
-                (missileYPos < bunkerArray[xIndex][yIndex].getYPos() + bunkerBlockLength + missileRadius) &&
+    public boolean checkCollision(int xIndex, int yIndex, double otherXPos, double otherYPos, double otherRadius, double bunkerBlockLength, double bunkerBlockWidth) {
+        if ((otherXPos > bunkerArray[xIndex][yIndex].getXPos() - bunkerBlockWidth - otherRadius) &&
+                (otherXPos < bunkerArray[xIndex][yIndex].getXPos() + bunkerBlockWidth + otherRadius) &&
+                (otherYPos > bunkerArray[xIndex][yIndex].getYPos() - bunkerBlockLength - otherRadius) &&
+                (otherYPos < bunkerArray[xIndex][yIndex].getYPos() + bunkerBlockLength + otherRadius) &&
                 bunkerArray[xIndex][yIndex].getActive()) {
             return true;
         } else {

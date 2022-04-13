@@ -1,5 +1,5 @@
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) { //crates new instance of menu and using that to call main menu
         Menu menu = new Menu();
         menu.createGame();
     }
