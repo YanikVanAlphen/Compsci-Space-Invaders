@@ -83,6 +83,7 @@ public class Game {
             if (enemyByPlayer(enemies, player)) {  //player killed by enemies
                 ENEMY_KILLED = 0;
                 LIVES--;
+                resetBunkers();
                 if (LIVES <= 0) {
                     writeScore(SCORE);
                     reset();
@@ -101,6 +102,7 @@ public class Game {
             updatePlayer(player);
             updateMissiles();
             updateBunkers(player);
+            checkEnemyBunkerCollision(enemies);
             destroy(enemies);
 
             if (ENEMY_KILLED == (ENEMY_NUM * ENEMY_NUM)) { //pass to next level when all enemies are destroyed
@@ -195,7 +197,7 @@ public class Game {
 
         for (int i = 0; i < ENEMY_NUM; i++) { //killed by enemies
             for (int j = 0; j < ENEMY_NUM; j++) {
-                if ((enemies[i][j].getActive()) && (enemies[i][j].getY() - ENEMY_RADIUS < player.getY() + 1)) {
+                if ((enemies[i][j].getActive()) && (enemies[i][j].getY() - ENEMY_RADIUS < player.getY() + ENEMY_RADIUS)) {
                     answer1 = true;
                     i = ENEMY_NUM;
                     j = ENEMY_NUM;
@@ -272,7 +274,7 @@ public class Game {
 
         }
 
-        if (FRAME_COUNT > 5 && StdDraw.isKeyPressed(32)) { // space-bar: 32
+        if (FRAME_COUNT > 7 && StdDraw.isKeyPressed(32)) { // space-bar: 32
             FRAME_COUNT = 0;
             MISSILES.add(new Missile(player.getX(), player.getY(), player.getAngle()));
             StdAudio.playInBackground("images/missileShoot.wav");
@@ -339,6 +341,67 @@ public class Game {
         }
     }
 
+    public void checkEnemyBunkerCollision(Enemy[][] enemies) {
+        if ((getHighestActiveBunkerYPos() - bunker1.getBunkerHeight() / 6 - ENEMY_RADIUS < getLowestEnemyYPos(enemies)) &&
+                (getHighestActiveBunkerYPos() + bunker1.getBunkerHeight() / 6 + ENEMY_RADIUS > getLowestEnemyYPos(enemies))) {
+            deactivateBunkerRow(getHighestActiveBunkerYPos());
+        }
+    }
+
+    public void deactivateBunkerRow(double yPos) {
+        StdAudio.play("images/bunkerHit.wav");
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 5; y++) {
+                if ((bunker1.getYCoord(x, y) == yPos)) {
+                    bunker1.setActive(x, y, false);
+                }
+                if ((bunker2.getYCoord(x, y) == yPos)) {
+                    bunker2.setActive(x, y, false);
+                }
+                if ((bunker3.getYCoord(x, y) == yPos)) {
+                    bunker3.setActive(x, y, false);
+                }
+            }
+        }
+    }
+
+    public double getLowestEnemyYPos(Enemy[][] enemies) {
+        double lowest = 10;
+        for (int i = 0; i < ENEMY_NUM; i++) {
+            for (int j = 0; j < ENEMY_NUM; j++) {
+                Enemy e = enemies[i][j];
+
+                if (e.getActive()) {
+                    if (e.getY() < lowest) {
+                        lowest = e.getY();
+                    }
+                }
+
+            }
+        }
+        return lowest;
+    }
+
+    public double getHighestActiveBunkerYPos() {
+        double highest = 0;
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 5; y++) {
+                if ((bunker1.getActive(x, y)) && (bunker1.getYCoord(x, y) > highest)) {
+                    highest = bunker1.getYCoord(x, y);
+                }
+
+                if ((bunker2.getActive(x, y)) && (bunker2.getYCoord(x, y) > highest)) {
+                    highest = bunker2.getYCoord(x, y);
+                }
+
+                if ((bunker3.getActive(x, y)) && (bunker3.getYCoord(x, y) > highest)) {
+                    highest = bunker3.getYCoord(x, y);
+                }
+            }
+        }
+        return highest;
+    }
+
     public void updateBunkers(PlayerCharacter player) { //updates bunker positions, omits inactive bunkers (bunkers that have been shot already)
         StdDraw.setPenColor(Color.RED);
         for (int x = 0; x < 3; x++) {
@@ -367,6 +430,7 @@ public class Game {
                     if (missileType == 0) {
                         ENEMY_MISSILES.remove(missileIndex);
                     }
+                    StdAudio.play("images/bunkerHit.wav");
                     sentinel = true;
                     break;
                 }
@@ -379,6 +443,7 @@ public class Game {
                     if (missileType == 0) {
                         ENEMY_MISSILES.remove(missileIndex);
                     }
+                    StdAudio.play("images/bunkerHit.wav");
                     sentinel = true;
                     break;
                 }
@@ -391,6 +456,7 @@ public class Game {
                     if (missileType == 0) {
                         ENEMY_MISSILES.remove(missileIndex);
                     }
+                    StdAudio.play("images/bunkerHit.wav");
                     sentinel = true;
                     break;
                 }
@@ -429,7 +495,9 @@ public class Game {
         VX_PLAYER = 0.060;
         SCORE_INCREASE = 1;
         MISSILE_PERIOD = 2.0;
+    }
 
+    public void resetBunkers() {
         for (int x = 0; x < 3; x++) {
             for (int y = 0; y < 5; y++) {
                 bunker1.setActive(x, y, true);

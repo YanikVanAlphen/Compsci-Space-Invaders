@@ -31,7 +31,7 @@ public class Enemy {
     public ImageIcon getEnemyPicture() {
         return enemyPicture;
     }
-    
+
     public void setX(double x) {
         X = x;
     }

@@ -30,7 +30,7 @@ public class PlayerCharacter {
     public ImageIcon getPlayerPicture() {
         return playerPicture;
     }
-    
+
     public void setX(double x) {
         X = x;
     }

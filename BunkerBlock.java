@@ -46,4 +46,3 @@ public class BunkerBlock { // singular bunker block, many instances of the bunke
         yPos = yPosition;
     }
 }
-

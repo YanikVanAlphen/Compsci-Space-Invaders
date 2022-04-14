@@ -55,8 +55,8 @@ public class Menu {
 
         StdDraw.show(); //Displays drawings that are "stored" in buffer waiting for the show() command
 
+        StdAudio.loopInBackground("images/heartbeatNoise.wav");
         StdAudio.loopInBackground("images/apocalypseSuspense.wav");
-
         Game game = new Game();
 
         while ((!StdDraw.isKeyPressed(10)) && (!StdDraw.isKeyPressed(81)) && (!StdDraw.isKeyPressed(76))) { //while enter(32) or "q"(81) or "l"(108) has not been pressed, start menu screen must remain same
