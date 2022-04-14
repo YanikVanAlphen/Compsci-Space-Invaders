@@ -111,11 +111,12 @@ public class Game {
                 SCORE_INCREASE++;
                 MISSILE_PERIOD *= 0.8; //increase rate of enemy missile fire as FRAME_COUNT1 has to be bigger than a decreasing amount
                 
+                resetBunkers();
                 removeMissiles();
                 removeEnemyMissiles();
                 menu.nextlevel(SCORE_INCREASE);
                 newGame();
-                resetBunkers();
+                
             }
 
             StdDraw.show();
