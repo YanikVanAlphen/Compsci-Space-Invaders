@@ -1,5 +1,5 @@
-# Compsci-Space-Invaders
-Project for the Compsci module 2021
+# Space Invaders
+A game written for a University project
 
 
 Meet in person every second monday
